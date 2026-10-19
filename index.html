@@ -3,36 +3,209 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Alina's Handmade Boutique</title>
-<link rel="stylesheet" href="style-v7.css?v=9">
-<style>
-/* Hero boutique redesign */
-.hero{max-width:1180px;margin:26px auto 22px;display:grid;grid-template-columns:1fr 1.35fr;min-height:360px;background:#fbf0ed;border:1px solid #ead5cf;border-radius:4px;overflow:hidden}
-.hero-copy{padding:52px 38px 44px 58px;display:flex;flex-direction:column;justify-content:center}
-.hero-kicker{font:600 12px/1.2 Arial,sans-serif;letter-spacing:3px;text-transform:uppercase;color:#9b6972;margin-bottom:18px}
-.hero h1{margin:0 0 16px;font-family:Georgia,serif;font-size:52px;line-height:1.03;font-weight:400;color:#713f48}
-.hero h1 span{display:block;font-style:italic}
-.hero p{margin:0 0 26px;max-width:410px;font:16px/1.65 Arial,sans-serif;color:#756a68}
-.hero-btn{display:inline-flex;align-items:center;justify-content:center;width:max-content;padding:12px 25px;border-radius:24px;background:#713f48;color:#fff;text-decoration:none;font:600 14px Arial,sans-serif;transition:.2s}
-.hero-btn:hover{background:#5f343c;transform:translateY(-1px)}
-.hero-photo{min-height:360px;background:linear-gradient(135deg,#f6dfd9,#e8d0c4);position:relative;overflow:hidden}
-.hero-photo:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 28% 38%,rgba(255,255,255,.9) 0 8%,transparent 8.5%),radial-gradient(circle at 52% 62%,rgba(201,143,155,.7) 0 14%,transparent 14.5%),radial-gradient(circle at 72% 43%,rgba(216,194,164,.9) 0 12%,transparent 12.5%);opacity:.9}
-.hero-photo:after{content:"Alina's Handmade Boutique";position:absolute;right:34px;bottom:28px;font:italic 28px Georgia,serif;color:rgba(113,63,72,.72)}
-@media(max-width:800px){.hero{grid-template-columns:1fr;margin:18px 14px}.hero-copy{padding:38px 28px}.hero h1{font-size:42px}.hero-photo{min-height:230px}}
-</style>
+<title>Alina's Handmade Boutique — Catalog</title>
+<link rel="stylesheet" href="style-v7.css?v=10">
 </head>
 <body>
-<div class="order-bar"><span class="order-icon">🚚</span><strong>INFORMAȚII DESPRE COMANDĂ</strong><span>Comenzile se prelucrează doar după ce acestea au fost achitate.</span><span>Pentru comenzile de peste £100, acceptăm varianta de avans 50% din totalul comenzii.</span><a href="#informatii">Citește mai mult →</a></div>
-<header class="site-header"><a class="brand" href="#">Alina's Handmade Boutique<span>Detalii mici. Amintiri mari.</span></a><nav><a href="#">Acasă</a><a href="#categorii">Categorii</a><a href="#mot">Seturi Moț</a><a href="#tricouri">Tricouri</a><a href="#catalog">Catalog</a><a href="#contact">Contact</a></nav><div class="header-actions"><button aria-label="Căutare">⌕</button><button aria-label="Favorite">♡<b>0</b></button><button aria-label="Coșul meu">🛒<b>0</b></button></div></header>
-<main>
-<section class="hero" aria-label="Prezentare catalog">
-<div class="hero-copy"><div class="hero-kicker">Catalog online</div><h1>Detalii mici.<span>Amintiri mari.</span></h1><p>Produse personalizate create cu drag pentru botezuri, nunți, aniversări și toate momentele care merită păstrate.</p><a class="hero-btn" href="#categorii">Descoperă colecția</a></div>
-<div class="hero-photo" aria-label="Colecția Alina's Handmade Boutique"></div>
-</section>
-<section id="categorii" class="categories"><!-- categoriile existente sunt randate de catalog.js --></section>
-<section id="informatii" class="info-section"><h2>Informații despre comandă</h2><p>Comenzile se prelucrează după achitare. Pentru comenzile de peste £100 se poate achita un avans de 50%.</p></section>
-<section class="reviews"><h2>Ce spun clientele noastre</h2><p>Experiențe reale de la cliente care au ales Alina's Handmade Boutique.</p><div class="review-grid"><article>“<p>Am fost extrem de mulțumită de serviciu și nu aș putea fi mai mulțumită de experiența mea cu Alina.</p><strong>Dorosin Elena</strong></article><article>“<p>Recomand cu încredere. Servicii de calitate, răspuns prompt, livrare rapidă de 5*.</p><strong>Roxana Balan</strong></article><article>“<p>Vă mulțumim mult pentru munca depusă. Erica o să fie super impresionată de el!</p><strong>Alexandra Agape</strong></article></div><div class="review-cta">💞 <strong>Ai comandat de la noi?</strong> Ne-ar ajuta enorm să ne lași și tu o recenzie.<br><a href="https://www.facebook.com/a.Bootiq/reviews/?id=100063495073456&sk=reviews" target="_blank" rel="noopener">⭐ Lasă-ne o recenzie pe Facebook →</a></div></section>
+
+<div class="order-info-bar">
+  <div class="order-info-inner container">
+    <strong>INFORMAȚII DESPRE COMANDĂ</strong>
+    <span>Comenzile se prelucrează doar după ce acestea au fost achitate.</span>
+    <span>Pentru comenzile de peste £100, acceptăm varianta de avans 50% din totalul comenzii.</span>
+    <a href="#informatii">Citește mai mult →</a>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="header-inner container">
+    <a class="logo" href="#top">Alina's Handmade Boutique</a>
+    <nav aria-label="Navigare principală">
+      <a href="#top">Acasă</a>
+      <a href="#categorii">Categorii</a>
+      <a href="#mot">Seturi Moț</a>
+      <a href="#tricouri">Tricouri</a>
+      <a href="#categorii">Catalog</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="header-tools">
+      <button class="header-tool" type="button" aria-label="Căutare">⌕</button>
+      <button class="header-tool" type="button" aria-label="Favorite">♡<b class="tool-count">0</b></button>
+      <button class="header-tool" type="button" aria-label="Coșul meu">🛒<b class="tool-count">0</b></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-label="Prezentare catalog">
+    <div>
+      <p class="eyebrow">CATALOG ONLINE</p>
+      <h1>Detalii mici.<br><span>Amintiri mari.</span></h1>
+      <p class="intro">Produse personalizate create cu drag pentru botezuri, nunți, aniversări și toate momentele care merită păstrate.</p>
+      <a class="hero-btn" href="#categorii">Descoperă colecția</a>
+    </div>
+  </section>
+
+  <section id="categorii" class="section category-section">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">COLECȚIILE NOASTRE</p>
+        <h2>Alege categoria dorită</h2>
+        <p>Descoperă modelele disponibile și alege produsul pe care vrei să îl personalizezi.</p>
+      </div>
+      <div id="category-grid" class="category-grid"></div>
+    </div>
+  </section>
+
+  <section id="mot" class="section product-section">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">SETURI PENTRU MOȚ</p>
+        <h2>Fetiță sau băiat</h2>
+        <p>Alege modelul preferat, apoi completează detaliile pentru personalizare.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-gender="fata" type="button">🎀 Fetiță</button>
+        <button class="tab" data-gender="baiat" type="button">👦 Băiat</button>
+      </div>
+
+      <div id="modelGrid" class="model-grid"></div>
+
+      <div id="personalizare" class="custom-box">
+        <div class="custom-title">
+          <span>🎀</span>
+          <div>
+            <h3>Personalizează setul</h3>
+            <p>Completează detaliile pe care dorești să apară pe tăviță.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <label>Model dorit
+            <input id="modelChoice" placeholder="Selectează un model de mai sus sau scrie numele modelului dorit">
+          </label>
+          <label>Numele copilului
+            <input id="childName" placeholder="Numele copilului">
+          </label>
+          <label>Data
+            <input id="childDate" placeholder="Ex. 12.05.2027">
+          </label>
+          <label>Tema dorită
+            <input id="tray" type="hidden" value="70">
+            <input id="theme" placeholder="Ex. Safari, prințesă, fluturași">
+          </label>
+          <label class="full">Mesaj pentru tăviță (opțional)
+            <textarea id="trayMessage" placeholder="Scrie mesajul dorit pentru tăviță"></textarea>
+          </label>
+        </div>
+
+        <div class="photo-option">
+          <h3>📷 Fotografie copil</h3>
+          <div class="photo-choice">
+            <button class="photo-choice-btn active" data-photo="nu" type="button">Fără fotografie</button>
+            <button class="photo-choice-btn" data-photo="da" type="button">Adaugă fotografie copil +£5</button>
+          </div>
+          <p class="small">Fotografia nu se încarcă aici. După confirmarea comenzii pe WhatsApp, fotografia copilului va fi trimisă direct în conversație.</p>
+        </div>
+
+        <div class="shirt-add">
+          <button id="showShirts" class="secondary-btn" type="button">👕 Adaugă și tricouri tematice</button>
+        </div>
+
+        <div id="shirts" class="shirts" hidden>
+          <div class="shirt-header">
+            <div>
+              <h3>Tricouri tematice</h3>
+              <p>Copil: £10/buc. · Adult: £13/buc.</p>
+            </div>
+            <button id="addShirt" class="secondary-btn" type="button">+ Adaugă tricou</button>
+          </div>
+          <div id="shirtRows"></div>
+        </div>
+
+        <div class="form-grid" style="margin-top:22px">
+          <label>Nume pentru livrare
+            <input id="deliveryName" placeholder="Numele complet">
+          </label>
+          <label>Telefon
+            <input id="phone" placeholder="Număr de telefon">
+          </label>
+          <label>Adresă
+            <input id="address" placeholder="Adresa completă">
+          </label>
+          <label>Cod poștal
+            <input id="postcode" placeholder="Cod poștal">
+          </label>
+        </div>
+
+        <div class="invoice-box">
+          <h3>🧾 Factură</h3>
+          <div class="choice">
+            <button class="invoice-choice active" data-invoice="nu" type="button">Nu doresc factură</button>
+            <button class="invoice-choice" data-invoice="da" type="button">Doresc factură</button>
+          </div>
+          <div id="invoiceEmailWrap" hidden>
+            <label>Email pentru factură
+              <input id="invoiceEmail" type="email" placeholder="adresa@email.com">
+            </label>
+          </div>
+        </div>
+
+        <div class="summary-section" style="margin-top:28px">
+          <div class="summary">
+            <h2>Rezumatul comenzii</h2>
+            <div id="summary"></div>
+            <div class="total" id="total">£75.95</div>
+            <p class="small">Livrare: £5.95 pentru un set. Dacă se adaugă tricouri, livrarea este £8.95. Comenzile de peste 1 kg au același cost de livrare.</p>
+            <button id="orderWhatsApp" class="whatsapp-btn" type="button">Comandă prin WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tricouri" class="section product-section">
+    <div class="container">
+      <div class="product-placeholder">
+        <span>👕</span>
+        <div><h3>Tricouri personalizate</h3><p>Copii, damă și bărbat. Modelele și opțiunile de personalizare vor fi adăugate din manager.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section product-section"><div class="container"><div class="product-placeholder"><span>🏅</span><div><h3>Ecusoane personalizate</h3><p>Mai multe modele și tematici vor fi disponibile aici.</p></div></div></div></section>
+  <section class="section product-section"><div class="container"><div class="product-placeholder"><span>🎂</span><div><h3>Cake Toppers</h3><p>Alege tema și scrie exact detaliile pentru personalizarea topperului.</p></div></div></div></section>
+  <section class="section product-section"><div class="container"><div class="product-placeholder"><span>💍</span><div><h3>Nuntă</h3><p>Invitații, mărturii, papetărie și accesorii personalizate.</p></div></div></div></section>
+  <section class="section product-section"><div class="container"><div class="product-placeholder"><span>🕊️</span><div><h3>Botez</h3><p>Produse personalizate pentru botez și cele mai frumoase amintiri.</p></div></div></div></section>
+  <section class="section product-section"><div class="container"><div class="product-placeholder"><span>🎁</span><div><h3>Cadouri personalizate</h3><p>Cadouri create special pentru persoana și ocazia aleasă.</p></div></div></div></section>
+
+  <section id="informatii" class="section info-section">
+    <div class="container"><div class="info-card"><h2>Informații despre comandă</h2><p>Comenzile se prelucrează doar după ce acestea au fost achitate.</p><p>Pentru comenzile de peste £100, acceptăm varianta de avans 50% din totalul comenzii.</p><p>După confirmarea comenzii pe WhatsApp, fotografia copilului poate fi trimisă direct în conversație, dacă ai ales opțiunea +£5.</p></div></div>
+  </section>
+
+  <section class="reviews-section">
+    <div class="container">
+      <h2>Ce spun clientele noastre</h2>
+      <p>Experiențe reale de la cliente care au ales Alina's Handmade Boutique.</p>
+      <div class="review-grid">
+        <article><span>“</span><p>Am fost extrem de mulțumită de serviciu și nu aș putea fi mai mulțumită de experiența mea cu Alina. Totul mi-a depășit așteptările!</p><strong>Dorosin Elena</strong></article>
+        <article><span>“</span><p>Recomand cu încredere. Servicii de calitate, răspuns prompt, livrare rapidă de 5*. Mulțumesc din suflet!</p><strong>Roxana Balan</strong></article>
+        <article><span>“</span><p>Vă mulțumim mult pentru munca depusă. Erica o să fie super impresionată de el!</p><strong>Alexandra Agape</strong></article>
+      </div>
+      <div class="review-cta">💞 <strong>Ai comandat de la noi?</strong> Ne-ar ajuta enorm să ne lași și tu o recenzie.<br><a href="https://www.facebook.com/a.Bootiq/reviews/?id=100063495073456&sk=reviews" target="_blank" rel="noopener">⭐ Lasă-ne o recenzie pe Facebook →</a></div>
+    </div>
+  </section>
 </main>
-<footer id="contact"><div><h3>Alina's Handmade Boutique</h3><p>DETALII MICI, AMINTIRI MARI.</p></div><div><h3>Contact</h3><p>📧 alinashandmadeboutique@gmail.com<br>📱 WhatsApp: 07742 444493</p></div><div><h3>Program de lucru</h3><p>Luni–Vineri: 09:00–17:00<br>Sâmbătă: 10:00–13:00<br>Duminică: Închis</p></div></footer>
-<script src="catalog.js?v=9"></script>
-</body></html>
+
+<footer id="contact">
+  <div class="footer-inner container">
+    <div><h3>Alina's Handmade Boutique</h3><p>DETALII MICI, AMINTIRI MARI.</p></div>
+    <div><h3>Contact</h3><p>📧 alinashandmadeboutique@gmail.com<br>📱 WhatsApp: 07742 444493</p></div>
+    <div><h3>Program de lucru</h3><p>Luni–Vineri: 09:00–17:00<br>Sâmbătă: 10:00–13:00<br>Duminică: Închis</p></div>
+  </div>
+</footer>
+
+<script src="catalog.js?v=10"></script>
+</body>
+</html>
