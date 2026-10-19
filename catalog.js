@@ -10,17 +10,24 @@ const demoModels = [
 ];
 
 const categories = [
-  {id:"mot",icon:"🎀",name:"Seturi pentru moț",description:"Fetiță și băiat — modele, tăvi și personalizare."},
-  {id:"tricouri",icon:"👕",name:"Tricouri personalizate",description:"Tricouri tematice pentru copii și adulți."},
-  {id:"ecusoane",icon:"🏅",name:"Ecusoane",description:"Ecusoane și accesorii personalizate."},
-  {id:"toppers",icon:"🎂",name:"Cake Toppers",description:"Toppers pentru aniversări și evenimente."},
-  {id:"nunta",icon:"💍",name:"Nuntă",description:"Papetărie și produse personalizate pentru nuntă."},
-  {id:"botez",icon:"🕊️",name:"Botez",description:"Produse pentru botez și mărturii."},
-  {id:"cadouri",icon:"🎁",name:"Cadouri personalizate",description:"Cadouri create special pentru fiecare ocazie."}
+  {id:"mot",icon:"🎀",name:"Seturi pentru moț",label:"Fetiță • Băiat",visual:"set",hint:"Mai multe modele"},
+  {id:"botez",icon:"🕊️",name:"Botez",label:"Invitații • Mărturii • Cadouri",visual:"botez",hint:"Mai multe modele"},
+  {id:"nunta",icon:"💍",name:"Nuntă",label:"Papetărie • Mărturii • Accesorii",visual:"nunta",hint:"Mai multe modele"},
+  {id:"toppers",icon:"🎂",name:"Cake Toppers",label:"Aniversări • Evenimente",visual:"toppers",hint:"Mai multe modele"},
+  {id:"tricouri",icon:"👕",name:"Tricouri personalizate",label:"Copii • Damă • Bărbat",visual:"tricouri",hint:"Mai multe modele"},
+  {id:"ecusoane",icon:"🏅",name:"Ecusoane",label:"Modele • Tematici • Personalizare",visual:"ecusoane",hint:"Mai multe modele"},
+  {id:"cadouri",icon:"🎁",name:"Cadouri personalizate",label:"Pentru orice ocazie",visual:"cadouri",hint:"Mai multe modele"}
 ];
 
 const categoryGrid=document.getElementById("category-grid");
-if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}"><div class="category-icon">${c.icon}</div><div><h3>${c.name}</h3><p>${c.description}</p></div></a>`).join("");
+if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
+  <div class="category-visual category-${c.visual}">
+    <div class="category-art-main">${c.icon}</div>
+    <div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>
+    <span class="category-arrow">↗</span>
+  </div>
+  <div class="category-card-body"><h3>${c.name}</h3><p>${c.label}</p><span class="category-models">— &nbsp; ${c.hint}</span></div>
+</a>`).join("");
 
 let gender="fata", selected=null, invoice="nu", childPhoto="nu", shirts=[];
 const $=id=>document.getElementById(id);
