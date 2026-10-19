@@ -1,4 +1,4 @@
-const settings = { childShirtPrice: 10, adultShirtPrice: 13, rectangularTray: 70, roundTray: 80, shippingSet: 5.95, shippingWithShirts: 8.95, whatsapp: "447742444493" };
+const settings = { childShirtPrice: 10, adultShirtPrice: 13, rectangularTray: 70, roundTray: 80, childPhotoPrice: 5, shippingSet: 5.95, shippingWithShirts: 8.95, whatsapp: "447742444493" };
 
 const demoModels = [
   {id:"f1",gender:"fata",name:"Model fetiță 01",image:""},
@@ -22,7 +22,7 @@ const categories = [
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}"><div class="category-icon">${c.icon}</div><div><h3>${c.name}</h3><p>${c.description}</p></div></a>`).join("");
 
-let gender="fata", selected=null, invoice="nu", shirts=[];
+let gender="fata", selected=null, invoice="nu", childPhoto="nu", shirts=[];
 const $=id=>document.getElementById(id);
 const money=n=>`£${Number(n).toFixed(2)}`;
 
@@ -33,6 +33,8 @@ function renderModels(){
 }
 
 document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{gender=btn.dataset.gender;document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");renderModels()});
+
+document.querySelectorAll(".photo-choice-btn").forEach(btn=>btn.onclick=()=>{childPhoto=btn.dataset.photo;document.querySelectorAll(".photo-choice-btn").forEach(x=>x.classList.remove("active"));btn.classList.add("active");renderSummary()});
 
 function shirtOptions(type){
   if(type==="copil") return ["Body 0–3 luni","Body 3–6 luni","Body 6–9 luni","Body 9–12 luni","Body 12–18 luni","Body 18–24 luni","Tricou 2 ani","Tricou 3 ani","Tricou 4 ani","Tricou 5 ani","Tricou 6 ani","Tricou 7 ani","Tricou 8 ani","Tricou 9 ani","Tricou 10 ani","Tricou 11 ani","Tricou 12 ani","Tricou 13 ani"];
@@ -51,12 +53,12 @@ $("addShirt").onclick=()=>{shirts.push({type:"copil",size:"Body 0–3 luni",pers
 document.querySelectorAll(".invoice-choice").forEach(b=>b.onclick=()=>{invoice=b.dataset.invoice;document.querySelectorAll(".invoice-choice").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("invoiceEmailWrap").hidden=invoice!=="da";renderSummary()});
 
 function shirtTotal(){return shirts.reduce((sum,s)=>sum+(Number(s.qty)||0)*(s.type==="copil"?settings.childShirtPrice:settings.adultShirtPrice),0)}
-function total(){const tray=Number($("tray").value||70);return tray+shirtTotal()+(shirts.length?settings.shippingWithShirts:settings.shippingSet)}
-function renderSummary(){let tray=Number($("tray").value||70), html=`<div class="summary-block"><b>🎀 Set Moț</b><div class="summary-line"><span>${$("modelChoice").value||"Model nespecificat"}</span><strong>${money(tray)}</strong></div><div>Copil: ${$("childName").value||"—"} · Data: ${$("childDate").value||"—"}</div><div>Mesaj tavă: ${$("trayMessage").value||"—"}</div></div>`;if(shirts.length){html+=`<div class="summary-block"><b>👕 Tricouri tematice</b>`+shirts.map(s=>`<div class="summary-line"><span>${s.qty} × ${s.size} — Pentru: ${s.person||"nespecificat"}${s.message?` — Mesaj: ${s.message}`:""}</span><strong>${money((s.type==="copil"?settings.childShirtPrice:settings.adultShirtPrice)*s.qty)}</strong></div>`).join("")+`</div>`}html+=`<div class="summary-line"><span>Livrare</span><strong>${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}</strong></div>`;$("summary").innerHTML=html;$("total").textContent=`Total: ${money(total())}`}
+function total(){const tray=Number($("tray").value||70);return tray+(childPhoto==="da"?settings.childPhotoPrice:0)+shirtTotal()+(shirts.length?settings.shippingWithShirts:settings.shippingSet)}
+function renderSummary(){let tray=Number($("tray").value||70), html=`<div class="summary-block"><b>🎀 Set Moț</b><div class="summary-line"><span>${$("modelChoice").value||"Model nespecificat"}</span><strong>${money(tray)}</strong></div><div>Copil: ${$("childName").value||"—"} · Data: ${$("childDate").value||"—"}</div><div>Mesaj tavă: ${$("trayMessage").value||"—"}</div><div>Fotografie copil: ${childPhoto==="da"?"DA (+£5)":"NU"}</div></div>`;if(shirts.length){html+=`<div class="summary-block"><b>👕 Tricouri tematice</b>`+shirts.map(s=>`<div class="summary-line"><span>${s.qty} × ${s.size} — Pentru: ${s.person||"nespecificat"}${s.message?` — Mesaj: ${s.message}`:""}</span><strong>${money((s.type==="copil"?settings.childShirtPrice:settings.adultShirtPrice)*s.qty)}</strong></div>`).join("")+`</div>`}html+=`<div class="summary-line"><span>Livrare</span><strong>${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}</strong></div>`;$("summary").innerHTML=html;$("total").textContent=`Total: ${money(total())}`}
 
 function validate(){const req=[["modelChoice","modelul"],["childName","numele copilului"],["deliveryName","numele pentru livrare"],["phone","telefonul"],["address","adresa"],["postcode","postcode-ul"]];for(const [id,label] of req)if(!$(id).value.trim()){alert(`Te rugăm să completezi ${label}.`);$(id).focus();return false}if(invoice==="da"&&!$("invoiceEmail").value.trim()){alert("Te rugăm să introduci emailul pentru factură.");$("invoiceEmail").focus();return false}for(const s of shirts)if(!s.person.trim()){alert("Completează pentru cine este fiecare tricou.");return false}return true}
 
-$("whatsapp").onclick=()=>{if(!validate())return;let lines=["🛍️ COMANDĂ NOUĂ — ALINA'S HANDMADE BOUTIQUE","","🎀 SET PENTRU MOȚ",`Model: ${$("modelChoice").value}`,`Tavă: ${$("tray").value==70?"Dreptunghiulară":"Rotundă"} — ${money($("tray").value)}`,`Nume copil: ${$("childName").value}`,`Data: ${$("childDate").value||"—"}`,`Mesaj tavă: ${$("trayMessage").value||"—"}`];if(shirts.length){lines.push("","👕 TRICOURI TEMATICE");shirts.forEach(s=>lines.push(`${s.qty} × ${s.size} — Pentru: ${s.person}`,`Mesaj: ${s.message||"—"}`))}lines.push("",`🚚 Livrare: ${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}`,`💷 TOTAL: ${money(total())}`,"","📦 DATE LIVRARE",`Nume: ${$("deliveryName").value}`,`Adresă: ${$("address").value}`,`Postcode: ${$("postcode").value}`,`Telefon: ${$("phone").value}`,"",`🧾 Factură: ${invoice==="da"?"DA":"NU"}`);if(invoice==="da")lines.push(`Email factură: ${$("invoiceEmail").value}`);window.open(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`,"_blank")};
+$("whatsapp").onclick=()=>{if(!validate())return;let lines=["🛍️ COMANDĂ NOUĂ — ALINA'S HANDMADE BOUTIQUE","","🎀 SET PENTRU MOȚ",`Model: ${$("modelChoice").value}`,`Tavă: ${$("tray").value==70?"Dreptunghiulară":"Rotundă"} — ${money($("tray").value)}`,`Nume copil: ${$("childName").value}`,`Data: ${$("childDate").value||"—"}`,`Mesaj tavă: ${$("trayMessage").value||"—"}`,`Fotografie copil: ${childPhoto==="da"?"DA — +£5. Fotografia va fi trimisă după confirmarea comenzii, direct pe WhatsApp.":"NU"}`];if(shirts.length){lines.push("","👕 TRICOURI TEMATICE");shirts.forEach(s=>lines.push(`${s.qty} × ${s.size} — Pentru: ${s.person}`,`Mesaj: ${s.message||"—"}`))}lines.push("",`🚚 Livrare: ${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}`,`💷 TOTAL: ${money(total())}`,"","📦 DATE LIVRARE",`Nume: ${$("deliveryName").value}`,`Adresă: ${$("address").value}`,`Postcode: ${$("postcode").value}`,`Telefon: ${$("phone").value}`,"",`🧾 Factură: ${invoice==="da"?"DA":"NU"}`);if(invoice==="da")lines.push(`Email factură: ${$("invoiceEmail").value}`);window.open(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`,"_blank")};
 
 const searchToggle=$("searchToggle"), searchPanel=$("searchPanel"), catalogSearch=$("catalogSearch");
 searchToggle.onclick=()=>{searchPanel.hidden=!searchPanel.hidden;if(!searchPanel.hidden)catalogSearch.focus()};
