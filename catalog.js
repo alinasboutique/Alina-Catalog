@@ -1,5 +1,41 @@
 const settings = { childShirtPrice: 10, adultShirtPrice: 13, rectangularTray: 70, roundTray: 80, childPhotoPrice: 5, shippingSet: 5.95, shippingWithShirts: 8.95, whatsapp: "447742444493" };
 
+const categoryStyle=document.createElement("style");
+categoryStyle.textContent=`
+.category-section{padding-top:34px!important;padding-bottom:54px!important}
+.category-section .section-heading{display:block!important;margin-bottom:24px!important}
+.category-section .section-heading .eyebrow{color:#7b3f4b}
+.category-section .section-heading h2{font-size:31px!important;margin-bottom:6px!important}
+.category-section .section-heading>p:last-child{font-size:13px}
+.category-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:20px!important}
+.category-card{padding:0!important;min-height:0!important;display:block!important;overflow:hidden;background:#fff!important;border:1px solid #eadbd5!important;border-radius:18px!important;box-shadow:0 8px 25px rgba(105,61,67,.07)!important;transform:none!important;text-align:left!important}
+.category-card:hover{border-color:#d99ba7!important;box-shadow:0 14px 34px rgba(105,61,67,.13)!important;transform:translateY(-4px)!important}
+.category-card:first-child{border-color:#eadbd5!important;box-shadow:0 8px 25px rgba(105,61,67,.07)!important;transform:none!important}
+.category-card:first-child:hover{border-color:#d99ba7!important;box-shadow:0 14px 34px rgba(105,61,67,.13)!important;transform:translateY(-4px)!important}
+.category-visual{height:205px;position:relative;overflow:hidden;background:linear-gradient(135deg,#f7e5df 0%,#fff8f4 48%,#ead5c8 100%);display:flex;align-items:center;justify-content:center}
+.category-visual::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 18%,rgba(255,255,255,.85),transparent 22%),radial-gradient(circle at 84% 25%,rgba(201,130,145,.18),transparent 27%),radial-gradient(circle at 62% 92%,rgba(220,199,175,.42),transparent 32%)}
+.category-art-main{position:relative;z-index:2;width:112px;height:112px;border-radius:16px;background:rgba(255,255,255,.88);border:1px solid rgba(216,194,180,.8);box-shadow:0 10px 24px rgba(95,55,60,.12);display:grid;place-items:center;font-size:58px;transform:rotate(-2deg)}
+.category-art-mini{position:absolute;z-index:1;width:78px;height:96px;border-radius:11px;background:linear-gradient(145deg,#fff,#f3dfd8);border:1px solid rgba(216,194,180,.75);box-shadow:0 7px 17px rgba(95,55,60,.10)}
+.category-art-mini::after{content:"";position:absolute;left:13px;right:13px;top:14px;height:5px;border-radius:4px;background:rgba(123,63,75,.13);box-shadow:0 12px 0 rgba(123,63,75,.08),0 24px 0 rgba(123,63,75,.06)}
+.mini-one{left:17%;top:27px;transform:rotate(-9deg)}.mini-two{right:15%;top:31px;transform:rotate(8deg)}.mini-three{right:25%;bottom:17px;transform:rotate(3deg);opacity:.78}
+.category-mot .category-art-main{background:linear-gradient(145deg,#fff5f4,#f7dfe2)}
+.category-botez .category-art-main{background:linear-gradient(145deg,#fff,#eee9f5)}
+.category-nunta .category-art-main{background:linear-gradient(145deg,#fff,#f4e7df)}
+.category-toppers .category-art-main{background:linear-gradient(145deg,#fff,#f9e3dc)}
+.category-tricouri .category-art-main{background:linear-gradient(145deg,#fff,#e9f2ed)}
+.category-ecusoane .category-art-main{background:linear-gradient(145deg,#fff,#f6ead7)}
+.category-cadouri .category-art-main{background:linear-gradient(145deg,#fff,#f4dfe4)}
+.category-arrow{position:absolute;z-index:3;right:12px;bottom:12px;width:31px;height:31px;border-radius:50%;background:#fff;color:#7b3f4b;display:grid;place-items:center;border:1px solid #ead3d1;font-size:16px;box-shadow:0 4px 12px rgba(80,50,50,.10)}
+.category-card-body{position:relative;padding:16px 17px 15px;background:linear-gradient(180deg,#fffaf8 0%,#f9ece9 100%)}
+.category-card-body::after{content:"";position:absolute;right:24px;top:14px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(201,130,145,.35);opacity:.6}
+.category-card-body h3{font:500 21px/1.2 Georgia,serif!important;margin:0 0 5px!important;color:#68434a!important}
+.category-card-body p{display:block!important;margin:0 0 8px!important;color:#806f70!important;font:400 11px/1.35 Arial,sans-serif!important}
+.category-models{display:block;color:#9a7479;font:700 9px/1 Arial,sans-serif;letter-spacing:.9px;text-transform:uppercase}
+@media(max-width:1050px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:700px){.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}.category-visual{height:155px}.category-art-main{width:82px;height:82px;font-size:43px}.category-art-mini{width:55px;height:72px}.category-card-body{padding:12px}.category-card-body h3{font-size:17px!important}.category-card-body p{font-size:10px!important}}
+`;
+document.head.appendChild(categoryStyle);
+
 const demoModels = [
   {id:"f1",gender:"fata",name:"Model fetiță 01",image:""},
   {id:"f2",gender:"fata",name:"Model fetiță 02",image:""},
