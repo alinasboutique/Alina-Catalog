@@ -1,0 +1,30 @@
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fffdfa;color:#3e4436;font-family:Arial,Helvetica,sans-serif}
+a{text-decoration:none;color:inherit}
+.container{max-width:1180px;margin:0 auto;padding-left:30px;padding-right:30px}
+.site-header{position:sticky;top:0;z-index:10;background:#fffdfa;border-bottom:1px solid #dedfce}
+.header-inner{min-height:82px;display:flex;align-items:center;justify-content:space-between}
+.logo{font:500 30px Georgia,serif;color:#667044}
+nav{display:flex;gap:25px;font-size:14px}
+.hero{padding-top:85px;padding-bottom:70px}
+.eyebrow{margin:0 0 12px;font-size:11px;letter-spacing:2px;font-weight:700;color:#7b8559}
+h1,h2{font-family:Georgia,serif;font-weight:500}
+h1{font-size:56px;margin:0 0 18px}
+h2{font-size:38px;margin:0 0 12px}
+.intro{max-width:760px;color:#77776e;font-size:17px;line-height:1.7}
+.section{padding-top:45px;padding-bottom:80px}
+.section-heading{margin-bottom:30px}
+.section-heading>p:last-child{color:#77776e}
+.category-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.category-card{background:#fff;border:1px solid #dedfce;border-radius:18px;padding:25px;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;transition:.2s}
+.category-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(60,65,45,.08)}
+.category-icon{font-size:28px}
+.category-card h3{font:500 24px Georgia,serif;margin:15px 0 0}
+.category-card p{font-size:13px;color:#77776e;margin:7px 0 0}
+.contact-section{background:#f0f0e5;padding:55px 0}
+.contact-section h2{font-size:30px}
+.contact-section p{color:#62675a;line-height:1.6}
+footer{background:#e7e9da;padding:18px 0;font-size:11px;color:#62675a;text-align:center}
+@media(max-width:800px){.category-grid{grid-template-columns:1fr 1fr}.header-inner{flex-direction:column;justify-content:center;gap:12px;padding-top:15px;padding-bottom:15px}}
+@media(max-width:560px){h1{font-size:40px}.category-grid{grid-template-columns:1fr}nav{gap:14px;font-size:12px}}
