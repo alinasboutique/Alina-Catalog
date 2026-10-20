@@ -1,9 +1,13 @@
-/* SETURI PENTRU MOȚ — folosește datele existente ale catalogului.
-   IMPORTANT: nu schimbă pagina principală și nu folosește Supabase pentru galerie.
-   Modelele/fotografiile existente sunt în IndexedDB, baza folosită de catalogul anterior,
-   disponibilă pe același domeniu GitHub Pages.
+/* SETURI PENTRU MOȚ — sursa reală a modelelor este catalogul Supabase.
+   Nu folosim IndexedDB ca sursă principală: aceea era baza locală a versiunii vechi
+   și de aici venea problema că pe alt dispozitiv / altă versiune nu apăreau toate pozele.
 */
 (() => {
+  const SB_URL = 'https://zbfqhmiqjcvicqlidswo.supabase.co';
+  const SB_KEY = 'sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
+  const API = SB_URL + '/rest/v1';
+  const HEADERS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+  const PHOTO_BUCKET = 'mot-models';
   const DB_NAME = 'AlinaCatalogFixed4';
   const STORE_NAME = 'products';
   const $ = id => document.getElementById(id);
@@ -18,6 +22,27 @@
   const esc = s => String(s ?? '').replace(/[&<>\"']/g, m => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'
   }[m]));
+
+  const normalize = v => String(v || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
+  const photoUrl = value => {
+    if (!value) return '';
+    if (/^(https?:)?\/\//i.test(value) || /^data:/i.test(value)) return value;
+    return SB_URL + '/storage/v1/object/public/' + PHOTO_BUCKET + '/' + String(value).replace(/^\//, '');
+  };
+
+  const wa = text => 'https://wa.me/447742444493?text=' + encodeURIComponent(text);
+
+  async function api(path) {
+    const response = await fetch(API + path, { headers: HEADERS });
+    const text = await response.text();
+    if (!response.ok) throw new Error(text || ('HTTP ' + response.status));
+    return text ? JSON.parse(text) : [];
+  }
 
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -36,264 +61,43 @@
     });
   }
 
-  function normalize(v) {
-    return String(v || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim();
+  function isGirl(model) {
+    const text = normalize([
+      model.category, model.category_name, model.subcategory, model.subcategory_name,
+      model.gender, model.sex, model.type, model.collection, model.section, model.name
+    ].filter(Boolean).join(' '));
+    return /fetit|fata|fetite|girl/.test(text) || text === 'f';
   }
 
-  function isMot(p) {
-    const text = normalize([p.category, p.categoryName, p.type, p.collection, p.section, p.name].join(' '));
-    return text.includes('mot') || text.includes('moț');
+  function isBoy(model) {
+    const text = normalize([
+      model.category, model.category_name, model.subcategory, model.subcategory_name,
+      model.gender, model.sex, model.type, model.collection, model.section, model.name
+    ].filter(Boolean).join(' '));
+    return /baiat|baieti|baietel|boy|masculin|mascul/.test(text) || text === 'b';
   }
 
-  function isGirl(p) {
-    const text = normalize([p.category, p.categoryName, p.gender, p.type, p.collection, p.name].join(' '));
-    return text.includes('fetit') || text.includes('fata') || text === 'f' || text.includes('girl');
+  function isMot(model) {
+    const text = normalize([
+      model.category, model.category_name, model.subcategory, model.subcategory_name,
+      model.type, model.collection, model.section, model.name
+    ].filter(Boolean).join(' '));
+    return text.includes('mot');
   }
 
-  function isBoy(p) {
-    const text = normalize([p.category, p.categoryName, p.gender, p.type, p.collection, p.name].join(' '));
-    return text.includes('baiat') || text.includes('baieti') || text === 'b' || text.includes('boy');
-  }
-
-  function productPhotos(p) {
-    const source = Array.isArray(p?.photos) ? p.photos : [];
+  function productPhotos(model) {
+    const source = Array.isArray(model?.photos) ? model.photos : [];
     return source.map(item => {
       if (typeof item === 'string') return item;
       if (!item || typeof item !== 'object') return '';
-      return item.url || item.src || item.image || item.imageUrl || item.path || item.file || item.data || '';
-    }).filter(Boolean);
-  }
-
-  function renderModels() {
-    const grid = $('modelGrid');
-    if (!grid) return;
-
-    const list = products.filter(p => {
-      if (!isMot(p)) return false;
-      return genderFilter === 'fetita' ? isGirl(p) : isBoy(p);
-    });
-
-    if (!list.length) {
-      grid.innerHTML = '<div class="mot-empty">Nu am găsit încă modele pentru această categorie.</div>';
-      return;
-    }
-
-    grid.innerHTML = list.map((model, index) => {
-      const photos = productPhotos(model);
-      const selected = selectedModel === model;
-      const gallery = photos.length
-        ? `<div class="mot-gallery">${photos.slice(0,12).map((url,i) => `
-            <button type="button" class="mot-photo" data-index="${i}" data-model="${index}" aria-label="Vezi fotografia ${i + 1}">
-              <img src="${esc(url)}" alt="${esc(model.name || 'Model set moț')}" loading="lazy">
-            </button>`).join('')}</div>`
-        : '<div class="mot-no-photo">Acest model nu are fotografii salvate în catalog.</div>';
-
-      return `<article class="mot-model-card ${selected ? 'mot-selected' : ''}" data-index="${index}">
-        ${gallery}
-        <div class="mot-model-info">
-          <h3>${esc(model.name || 'Model set moț')}</h3>
-          <p class="mot-description">${esc(model.description || 'Personalizează cu nume, fotografie copil, data și mesaj pentru tăviță.')}</p>
-          <p class="mot-price">Tavă dreptunghiulară £70 · Tavă rotundă £80</p>
-          <button type="button" class="mot-select">${selected ? '✓ Model ales' : 'Alege modelul acesta'}</button>
-        </div>
-      </article>`;
-    }).join('');
-
-    grid.querySelectorAll('.mot-select').forEach(button => {
-      button.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        const model = list[Number(button.closest('[data-index]').dataset.index)];
-        selectModel(model, '');
-      });
-    });
-
-    grid.querySelectorAll('.mot-photo').forEach(button => {
-      button.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        const model = list[Number(button.closest('[data-index]').dataset.index)];
-        const photos = productPhotos(model);
-        openLightbox(model, photos, Number(button.dataset.index));
-      });
-    });
-  }
-
-  function selectModel(model, photo) {
-    if (!model) return;
-    selectedModel = model;
-    selectedPhotoUrl = photo || '';
-    if ($('modelChoice')) $('modelChoice').value = model.name || '';
-    renderModels();
-    renderSummarySafe();
-    $('personalizare')?.scrollIntoView({ behavior:'smooth', block:'start' });
-  }
-
-  function openLightbox(model, photos, index) {
-    let box = $('motLightbox');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'motLightbox';
-      box.className = 'mot-lightbox';
-      box.innerHTML = `
-        <div class="mot-lightbox-inner">
-          <button type="button" class="mot-lightbox-close" aria-label="Închide">×</button>
-          <img class="mot-lightbox-image" alt="Fotografie model">
-          <h3 class="mot-lightbox-title"></h3>
-          <div class="mot-lightbox-thumbs"></div>
-          <button type="button" class="mot-lightbox-select">Alege această fotografie</button>
-        </div>`;
-      document.body.appendChild(box);
-
-      box.addEventListener('click', e => {
-        if (e.target === box || e.target.classList.contains('mot-lightbox-close')) box.classList.remove('open');
-      });
-
-      box.querySelector('.mot-lightbox-select').addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        const current = box._model;
-        const currentIndex = Number(box.dataset.photoIndex || 0);
-        const currentUrl = productPhotos(current)[currentIndex] || '';
-        selectModel(current, currentUrl);
-        box.classList.remove('open');
-      });
-    }
-
-    box._model = model;
-    box.dataset.photoIndex = String(index);
-    box.querySelector('.mot-lightbox-title').textContent = model.name || 'Model set moț';
-
-    const main = box.querySelector('.mot-lightbox-image');
-    const thumbs = box.querySelector('.mot-lightbox-thumbs');
-
-    function showPhoto(i) {
-      if (!photos[i]) return;
-      box.dataset.photoIndex = String(i);
-      main.src = photos[i];
-      main.alt = model.name || 'Fotografie model';
-      thumbs.querySelectorAll('button').forEach((b,n) => b.classList.toggle('active', n === i));
-    }
-
-    thumbs.innerHTML = photos.map((url,i) => `<button type="button" aria-label="Fotografia ${i+1}"><img src="${esc(url)}" alt=""></button>`).join('');
-    thumbs.querySelectorAll('button').forEach((button,i) => button.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      showPhoto(i);
-    }));
-    showPhoto(Math.min(index, Math.max(photos.length - 1, 0)));
-    box.classList.add('open');
-  }
-
-  function installTabs() {
-    document.querySelectorAll('.tab').forEach(oldTab => {
-      const tab = oldTab.cloneNode(true);
-      oldTab.replaceWith(tab);
-      tab.addEventListener('click', () => {
-        genderFilter = tab.dataset.gender === 'baiat' ? 'baiat' : 'fetita';
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        tab.classList.add('active');
-        renderModels();
-      });
-    });
-  }
-
-  function installCustomOptions() {
-    const custom = $('personalizare');
-    const form = custom?.querySelector('.form-grid');
-    if (!form) return;
-
-    const trayInput = $('tray');
-    if (trayInput) trayInput.type = 'hidden';
-
-    let box = $('motCustomTrayBox');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'motCustomTrayBox';
-      box.className = 'mot-custom-options';
-      box.innerHTML = `
-        <h3>Dacă nu găsești tematica dorită</h3>
-        <p>Scrie tema dorită în câmpul „Tema dorită”, apoi alege tipul de tavă.</p>
-        <div class="mot-choice-row">
-          <button type="button" class="mot-choice active" data-tray="70">Tavă dreptunghiulară £70</button>
-          <button type="button" class="mot-choice" data-tray="80">Tavă rotundă £80</button>
-        </div>`;
-      form.insertAdjacentElement('afterend', box);
-    }
-
-    box.querySelectorAll('[data-tray]').forEach(btn => btn.onclick = () => {
-      selectedTray = btn.dataset.tray;
-      if (trayInput) trayInput.value = selectedTray;
-      box.querySelectorAll('[data-tray]').forEach(x => x.classList.toggle('active', x === btn));
-      renderSummarySafe();
-    });
-
-    const dateInput = $('childDate');
-    const dateLabel = dateInput?.closest('label');
-    if (dateLabel) {
-      const textNode = Array.from(dateLabel.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
-      if (textNode) textNode.textContent = 'Data (opțional)';
-    }
-
-    const photoBox = custom.querySelector('.photo-option');
-    if (photoBox) photoBox.querySelectorAll('.photo-choice-btn').forEach(btn => btn.onclick = () => {
-      selectedChildPhoto = btn.dataset.photo === 'da' ? 'da' : 'nu';
-      photoBox.querySelectorAll('.photo-choice-btn').forEach(x => x.classList.toggle('active', x === btn));
-      renderSummarySafe();
-    });
-  }
-
-  function renderSummarySafe() {
-    if (typeof window.renderSummary === 'function') {
-      try { window.renderSummary(); } catch(e) { console.warn(e); }
-    }
-  }
-
-  function installWhatsApp() {
-    const button = $('orderWhatsApp');
-    if (!button || button.dataset.motWhatsappInstalled === '1') return;
-    button.dataset.motWhatsappInstalled = '1';
-    button.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      const name = $('childName')?.value?.trim() || '';
-      const date = $('childDate')?.value?.trim() || '';
-      const theme = $('theme')?.value?.trim() || '';
-      const message = $('trayMessage')?.value?.trim() || '';
-      const deliveryName = $('deliveryName')?.value?.trim() || '';
-      const phone = $('phone')?.value?.trim() || '';
-      const address = $('address')?.value?.trim() || '';
-      const postcode = $('postcode')?.value?.trim() || '';
-      const modelName = selectedModel?.name || $('modelChoice')?.value?.trim() || 'Tematică la alegere';
-      const modelPhoto = selectedPhotoUrl || (selectedModel ? productPhotos(selectedModel)[0] : '');
-
-      const lines = [
-        'Bună! Doresc să comand un set pentru moț.',
-        `Model ales: ${modelName}`,
-        `Tavă: ${selectedTray === '80' ? 'rotundă £80' : 'dreptunghiulară £70'}`,
-        name ? `Numele copilului: ${name}` : '',
-        date ? `Data: ${date}` : '',
-        theme ? `Tema dorită: ${theme}` : '',
-        message ? `Mesaj pentru tăviță: ${message}` : '',
-        `Fotografie copil: ${selectedChildPhoto === 'da' ? 'Da (+£5)' : 'Nu'}`,
-        deliveryName ? `Nume livrare: ${deliveryName}` : '',
-        phone ? `Telefon: ${phone}` : '',
-        address ? `Adresă: ${address}` : '',
-        postcode ? `Cod poștal: ${postcode}` : '',
-        modelPhoto ? `Fotografia modelului ales: ${modelPhoto}` : ''
-      ].filter(Boolean).join('\n');
-
-      window.open('https://wa.me/447742444493?text=' + encodeURIComponent(lines), '_blank', 'noopener');
-    }, true);
+      return item.image_url || item.url || item.src || item.image || item.imageUrl || item.path || item.file || item.data || '';
+    }).filter(Boolean).map(photoUrl);
   }
 
   function addStyles() {
+    if ($('mot-model-styles')) return;
     const style = document.createElement('style');
+    style.id = 'mot-model-styles';
     style.textContent = `
       .mot-model-card{background:#fff;border:1px solid #eadbd5;border-radius:18px;padding:10px;overflow:hidden;box-shadow:0 8px 24px rgba(105,61,67,.06)}
       .mot-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;background:#f8eee9;border-radius:13px;padding:5px;overflow:hidden}
@@ -326,9 +130,295 @@
       .mot-choice-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
       .mot-choice{border:1px solid #d8b7bd;background:#fff;border-radius:10px;padding:11px 8px;color:#7b3f4b;font-weight:800;cursor:pointer}
       .mot-choice.active{background:#7b3f4b;color:#fff;border-color:#7b3f4b}
-      @media(max-width:700px){.mot-gallery{grid-template-columns:repeat(3,1fr)}.mot-model-info h3{font-size:19px!important}.mot-lightbox{padding:10px}.mot-lightbox-inner{padding:10px}.mot-lightbox-image{max-width:92vw;max-height:66vh}.mot-choice-row{grid-template-columns:1fr}.mot-lightbox-thumbs{justify-content:flex-start}}
+      .mot-custom-photo-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+      .mot-custom-photo{border:1px solid #d8b7bd;background:#fff;border-radius:10px;padding:11px 8px;color:#7b3f4b;font-weight:800;cursor:pointer}
+      .mot-custom-photo.active{background:#7b3f4b;color:#fff;border-color:#7b3f4b}
+      @media(max-width:700px){
+        .mot-gallery{grid-template-columns:repeat(3,1fr)}
+        .mot-model-info h3{font-size:19px!important}
+        .mot-lightbox{padding:10px}
+        .mot-lightbox-inner{padding:10px}
+        .mot-lightbox-image{max-width:92vw;max-height:66vh}
+        .mot-choice-row,.mot-custom-photo-row{grid-template-columns:1fr}
+        .mot-lightbox-thumbs{justify-content:flex-start}
+      }
     `;
     document.head.appendChild(style);
+  }
+
+  function ensureLightbox() {
+    let box = $('motLightbox');
+    if (box) return box;
+
+    box = document.createElement('div');
+    box.id = 'motLightbox';
+    box.className = 'mot-lightbox';
+    box.innerHTML = `
+      <div class="mot-lightbox-inner">
+        <button type="button" class="mot-lightbox-close" aria-label="Închide">×</button>
+        <img class="mot-lightbox-image" alt="Fotografie model">
+        <h3 class="mot-lightbox-title"></h3>
+        <div class="mot-lightbox-thumbs"></div>
+        <button type="button" class="mot-lightbox-select">Alege această fotografie</button>
+      </div>`;
+    document.body.appendChild(box);
+
+    box.addEventListener('click', e => {
+      if (e.target === box || e.target.classList.contains('mot-lightbox-close')) box.classList.remove('open');
+    });
+
+    box.querySelector('.mot-lightbox-select').addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const model = box._model;
+      const index = Number(box.dataset.photoIndex || 0);
+      const photos = productPhotos(model);
+      selectModel(model, photos[index] || '');
+      box.classList.remove('open');
+    });
+
+    return box;
+  }
+
+  function openLightbox(model, photos, index = 0) {
+    if (!photos.length) return;
+    const box = ensureLightbox();
+    box._model = model;
+    box.dataset.photoIndex = String(index);
+    box.querySelector('.mot-lightbox-title').textContent = model.name || 'Model set moț';
+
+    const main = box.querySelector('.mot-lightbox-image');
+    const thumbs = box.querySelector('.mot-lightbox-thumbs');
+
+    const showPhoto = i => {
+      if (!photos[i]) return;
+      box.dataset.photoIndex = String(i);
+      main.src = photos[i];
+      main.alt = model.name || 'Model set moț';
+      thumbs.querySelectorAll('button').forEach((b,n) => b.classList.toggle('active', n === i));
+    };
+
+    thumbs.innerHTML = photos.map((url,i) => `<button type="button" aria-label="Fotografia ${i + 1}"><img src="${esc(url)}" alt=""></button>`).join('');
+    thumbs.querySelectorAll('button').forEach((button,i) => button.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      showPhoto(i);
+    }));
+
+    showPhoto(Math.min(index, photos.length - 1));
+    box.classList.add('open');
+  }
+
+  function renderModels() {
+    const grid = $('modelGrid');
+    if (!grid) return;
+
+    const list = products.filter(model => {
+      if (!isMot(model)) return false;
+      return genderFilter === 'fetita' ? isGirl(model) : isBoy(model);
+    });
+
+    if (!list.length) {
+      grid.innerHTML = '<div class="mot-empty">Nu am găsit modele pentru această categorie.</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map((model, index) => {
+      const photos = productPhotos(model);
+      const selected = selectedModel === model;
+      const gallery = photos.length
+        ? `<div class="mot-gallery">${photos.slice(0,12).map((url,i) => `
+            <button type="button" class="mot-photo" data-index="${i}" data-model="${index}" aria-label="Vezi fotografia ${i + 1}">
+              <img src="${esc(url)}" alt="${esc(model.name || 'Model set moț')}" loading="lazy">
+            </button>`).join('')}</div>`
+        : '<div class="mot-no-photo">Acest model nu are fotografii salvate în catalog.</div>';
+
+      return `<article class="mot-model-card ${selected ? 'mot-selected' : ''}" data-index="${index}">
+        ${gallery}
+        <div class="mot-model-info">
+          <h3>${esc(model.name || 'Model set moț')}</h3>
+          <p class="mot-description">${esc(model.description || 'Personalizează cu nume, fotografie copil, data și mesaj pentru tăviță.')}</p>
+          <p class="mot-price">Tavă dreptunghiulară £70 · Tavă rotundă £80</p>
+          <button type="button" class="mot-select">${selected ? '✓ Model ales' : 'Alege modelul acesta'}</button>
+        </div>
+      </article>`;
+    }).join('');
+
+    grid.querySelectorAll('.mot-select').forEach(button => {
+      button.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const model = list[Number(button.closest('[data-index]').dataset.index)];
+        selectModel(model, selectedPhotoUrl && selectedModel === model ? selectedPhotoUrl : '');
+      });
+    });
+
+    grid.querySelectorAll('.mot-photo').forEach(button => {
+      button.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const model = list[Number(button.closest('[data-index]').dataset.index)];
+        openLightbox(model, productPhotos(model), Number(button.dataset.index));
+      });
+    });
+  }
+
+  function selectModel(model, photo) {
+    if (!model) return;
+    selectedModel = model;
+    selectedPhotoUrl = photo || productPhotos(model)[0] || '';
+    if ($('modelChoice')) $('modelChoice').value = model.name || '';
+    renderModels();
+    renderSummarySafe();
+    $('personalizare')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function installTabs() {
+    document.querySelectorAll('.tab').forEach(oldTab => {
+      const tab = oldTab.cloneNode(true);
+      oldTab.replaceWith(tab);
+      tab.addEventListener('click', () => {
+        genderFilter = tab.dataset.gender === 'baiat' ? 'baiat' : 'fetita';
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        tab.classList.add('active');
+        selectedModel = null;
+        selectedPhotoUrl = '';
+        renderModels();
+      });
+    });
+  }
+
+  function installCustomOptions() {
+    const custom = $('personalizare');
+    const form = custom?.querySelector('.form-grid');
+    if (!custom || !form) return;
+
+    const trayInput = $('tray');
+    if (trayInput) trayInput.type = 'hidden';
+
+    let box = $('motCustomOptions');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'motCustomOptions';
+      box.className = 'mot-custom-options';
+      box.innerHTML = `
+        <h3>🎨 Dacă nu găsești tematica dorită</h3>
+        <p>Scrie tema dorită mai sus, apoi alege tipul de tavă și dacă dorești fotografia copilului.</p>
+        <div class="mot-choice-row">
+          <button type="button" class="mot-choice active" data-custom-tray="70">Tavă dreptunghiulară £70</button>
+          <button type="button" class="mot-choice" data-custom-tray="80">Tavă rotundă £80</button>
+        </div>
+        <div class="mot-custom-photo-row">
+          <button type="button" class="mot-custom-photo active" data-custom-photo="nu">Fără fotografie</button>
+          <button type="button" class="mot-custom-photo" data-custom-photo="da">Adaugă fotografie copil +£5</button>
+        </div>`;
+      form.insertAdjacentElement('afterend', box);
+    }
+
+    box.querySelectorAll('[data-custom-tray]').forEach(btn => {
+      btn.onclick = () => {
+        selectedTray = btn.dataset.customTray;
+        if (trayInput) trayInput.value = selectedTray;
+        box.querySelectorAll('[data-custom-tray]').forEach(x => x.classList.toggle('active', x === btn));
+        renderSummarySafe();
+      };
+    });
+
+    box.querySelectorAll('[data-custom-photo]').forEach(btn => {
+      btn.onclick = () => {
+        selectedChildPhoto = btn.dataset.customPhoto;
+        document.querySelectorAll('.photo-choice-btn').forEach(x => x.classList.toggle('active', x.dataset.photo === selectedChildPhoto));
+        box.querySelectorAll('[data-custom-photo]').forEach(x => x.classList.toggle('active', x === btn));
+        renderSummarySafe();
+      };
+    });
+
+    const dateInput = $('childDate');
+    const dateLabel = dateInput?.closest('label');
+    if (dateLabel) {
+      const textNode = Array.from(dateLabel.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+      if (textNode) textNode.textContent = 'Data (opțional)';
+    }
+
+    const photoBox = custom.querySelector('.photo-option');
+    if (photoBox) photoBox.querySelectorAll('.photo-choice-btn').forEach(btn => {
+      btn.onclick = () => {
+        selectedChildPhoto = btn.dataset.photo === 'da' ? 'da' : 'nu';
+        box.querySelectorAll('[data-custom-photo]').forEach(x => x.classList.toggle('active', x.dataset.customPhoto === selectedChildPhoto));
+        photoBox.querySelectorAll('.photo-choice-btn').forEach(x => x.classList.toggle('active', x === btn));
+        renderSummarySafe();
+      };
+    });
+  }
+
+  function renderSummarySafe() {
+    if (typeof window.renderSummary === 'function') {
+      try { window.renderSummary(); } catch(e) { console.warn(e); }
+    }
+  }
+
+  function installWhatsApp() {
+    const button = $('orderWhatsApp');
+    if (!button || button.dataset.motWhatsappInstalled === '1') return;
+    button.dataset.motWhatsappInstalled = '1';
+
+    button.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const name = $('childName')?.value?.trim() || '';
+      const date = $('childDate')?.value?.trim() || '';
+      const theme = $('theme')?.value?.trim() || '';
+      const message = $('trayMessage')?.value?.trim() || '';
+      const deliveryName = $('deliveryName')?.value?.trim() || '';
+      const phone = $('phone')?.value?.trim() || '';
+      const address = $('address')?.value?.trim() || '';
+      const postcode = $('postcode')?.value?.trim() || '';
+      const modelName = selectedModel?.name || $('modelChoice')?.value?.trim() || 'Tematică la alegere';
+      const modelPhoto = selectedPhotoUrl || (selectedModel ? productPhotos(selectedModel)[0] : '');
+
+      const lines = [
+        'Bună! Doresc să comand un set pentru moț.',
+        `Model ales: ${modelName}`,
+        `Tavă: ${selectedTray === '80' ? 'rotundă £80' : 'dreptunghiulară £70'}`,
+        name ? `Numele copilului: ${name}` : '',
+        date ? `Data: ${date}` : '',
+        theme ? `Tema dorită: ${theme}` : '',
+        message ? `Mesaj pentru tăviță: ${message}` : '',
+        `Fotografie copil: ${selectedChildPhoto === 'da' ? 'Da (+£5)' : 'Nu'}`,
+        deliveryName ? `Nume livrare: ${deliveryName}` : '',
+        phone ? `Telefon: ${phone}` : '',
+        address ? `Adresă: ${address}` : '',
+        postcode ? `Cod poștal: ${postcode}` : '',
+        modelPhoto ? `Fotografia modelului ales: ${modelPhoto}` : ''
+      ].filter(Boolean).join('\n');
+
+      window.open(wa(lines), '_blank', 'noopener');
+    }, true);
+  }
+
+  async function loadFromSupabase() {
+    const [modelsResult, photosResult] = await Promise.allSettled([
+      api('/mot_models?select=*&is_active=eq.true&order=display_order.asc,name.asc'),
+      api('/mot_model_photos?select=*&order=display_order.asc')
+    ]);
+
+    if (modelsResult.status !== 'fulfilled') throw modelsResult.reason;
+    const modelRows = Array.isArray(modelsResult.value) ? modelsResult.value : [];
+    const photoRows = photosResult.status === 'fulfilled' && Array.isArray(photosResult.value) ? photosResult.value : [];
+
+    modelRows.forEach(model => {
+      model.photos = photoRows
+        .filter(photo => String(photo.model_id) === String(model.id))
+        .sort((a,b) => (a.display_order || 0) - (b.display_order || 0));
+    });
+
+    return modelRows;
+  }
+
+  async function loadFromIndexedDB() {
+    const db = await openDB();
+    return getAllProducts(db);
   }
 
   async function load() {
@@ -341,12 +431,18 @@
     installWhatsApp();
 
     try {
-      const db = await openDB();
-      products = await getAllProducts(db);
+      products = await loadFromSupabase();
+      if (!products.length) throw new Error('Supabase nu a returnat modele active.');
       renderModels();
-    } catch (err) {
-      console.error('Seturi pentru moț:', err);
-      grid.innerHTML = '<div class="mot-empty">Nu am putut accesa modelele salvate în catalog. Reîncarcă pagina.</div>';
+    } catch (supabaseError) {
+      console.warn('Supabase mot models:', supabaseError);
+      try {
+        products = await loadFromIndexedDB();
+        renderModels();
+      } catch (localError) {
+        console.error('Seturi pentru moț:', localError);
+        grid.innerHTML = '<div class="mot-empty">Nu am putut încărca modelele și fotografiile. Reîncarcă pagina.</div>';
+      }
     }
   }
 
