@@ -60,9 +60,7 @@ const categories = [
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
   <div class="category-visual category-${c.visual}">
-    ${c.id==="mot"?`<img class="category-real-image" src="hero-mot-small.jpg?v=3" alt="Seturi pentru moț - Alina's Handmade Boutique">`:``}
-    <div class="category-art-main">${c.icon}</div>
-    <div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>
+    ${c.id==="mot"?`<img class="category-real-image" src="hero-mot-small.jpg?v=15" alt="Seturi pentru moț - Alina's Handmade Boutique">`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
     <span class="category-arrow">↗</span>
   </div>
   <div class="category-card-body"><h3>${c.name}</h3><p>${c.label}</p><span class="category-models">— &nbsp; ${c.hint}</span></div>
