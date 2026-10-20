@@ -80,7 +80,7 @@ const categories = [
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
   <div class="category-visual category-${c.visual}">
-    ${c.id==="mot"?`<img class="category-real-image" src="./hero-mot-small.jpg" alt="Seturi pentru moț - Alina's Handmade Boutique" loading="eager" onerror="this.onerror=null;this.src='./hero-mot-display.svg';">`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
+    ${c.id==="mot"?`<div class="category-art-main">🎀</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
     <span class="category-arrow">↗</span>
   </div>
   <div class="category-card-body"><h3>${c.name}</h3><p>${c.label}</p><span class="category-models">— &nbsp; ${c.hint}</span></div>
@@ -114,7 +114,7 @@ function renderModels(){
   document.querySelectorAll(".model-card").forEach(card=>{
     const model=demoModels.find(m=>m.id===card.dataset.id);
     card.querySelector(".model-photo").onclick=e=>{e.stopPropagation();openModelPhoto(model)};
-    card.querySelector(".model-select-btn").onclick=e=>{e.stopPropagation();selected=model;$("modelChoice").value=model.name;renderModels();renderSummary();$("personalizare").scrollIntoView({behavior:"smooth"})};
+    card.querySelector(".model-select-btn").onclick=e=>{e.stopPropagation();selected=model;$("modelChoice").value=model.name;renderSummary();$("personalizare").scrollIntoView({behavior:"smooth"})};
   });
 }
 
