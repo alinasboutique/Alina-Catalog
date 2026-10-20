@@ -1,19 +1,19 @@
-/* SETURI PENTRU MOT — folosim catalogul actual.
-   Nu modificam designul paginii principale.
-   Modelele sunt citite din catalog_products, iar fotografiile din catalog_product_photos.
+/* SETURI PENTRU MOȚ — funcționalitățile sunt izolate aici.
+   Nu modificăm designul paginii principale.
+   Produsele și fotografiile sunt încărcate din catalogul existent.
 */
 (() => {
   const SB_URL = 'https://zbfqhmiqjcvicqlidswo.supabase.co';
   const SB_KEY = 'sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
   const API = SB_URL + '/rest/v1';
   const HEADERS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
-  const BUCKET = 'catalog';
+  const BUCKET = 'mot-models';
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]));
   const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
   async function api(path) {
-    const r = await fetch(API + path, { headers: HEADERS });
+    const r = await fetch(API + path, { headers: HEADERS, cache: 'no-store' });
     const text = await r.text();
     if (!r.ok) throw new Error(text || ('HTTP ' + r.status));
     return text ? JSON.parse(text) : [];
@@ -25,22 +25,16 @@
     if (/^https?:\/\//i.test(raw) || /^data:/i.test(raw)) return raw;
     let clean = raw.replace(/^\/+/, '');
     clean = clean.replace(/^storage\/v1\/object\/public\/[^/]+\//i, '');
-    clean = clean.replace(/^catalog\//i, '');
     clean = clean.replace(/^mot-models\//i, '');
+    clean = clean.replace(/^catalog\//i, '');
     return `${SB_URL}/storage/v1/object/public/${BUCKET}/${clean}`;
   }
 
   function gender(product) {
     const text = norm([
-      product.gender,
-      product.sex,
-      product.subcategory,
-      product.sub_category,
-      product.product_gender,
-      product.audience,
-      product.category,
-      product.name,
-      product.description
+      product.gender, product.sex, product.subcategory, product.sub_category,
+      product.product_gender, product.audience, product.category, product.name,
+      product.description, product.personalization_options
     ].filter(Boolean).join(' '));
     if (/fetit|fetita|fetite|girl|fata/.test(text)) return 'fata';
     if (/baiat|baietel|baieti|boy/.test(text)) return 'baiat';
@@ -51,25 +45,30 @@
   let photos = [];
   let genderFilter = 'fata';
   let selectedModel = null;
+  let selectedPhotoUrl = '';
   let selectedTray = '70';
   let selectedChildPhoto = 'nu';
 
-  function productPhotoRows(product) {
-    if (!product) return [];
-    const ids = new Set([
-      String(product.id ?? ''),
-      String(product.product_id ?? ''),
-      String(product.model_id ?? '')
-    ].filter(Boolean));
-    return photos.filter(p => {
-      const photoIds = [p.product_id, p.model_id, p.catalog_product_id, p.catalog_product].filter(v => v !== undefined && v !== null).map(String);
-      return photoIds.some(id => ids.has(id));
+  function sortRows(rows) {
+    return [...rows].sort((a,b) => {
+      const ao = Number(a.display_order ?? a.sort_order ?? 999999);
+      const bo = Number(b.display_order ?? b.sort_order ?? 999999);
+      return ao - bo;
     });
   }
 
   function getProductPhotos(product) {
-    return productPhotoRows(product)
-      .sort((a,b) => Number(a.display_order || a.sort_order || 0) - Number(b.display_order || b.sort_order || 0))
+    if (!product) return [];
+    const ids = new Set([
+      product.id, product.product_id, product.model_id, product.catalog_product_id
+    ].filter(v => v !== undefined && v !== null && String(v) !== '').map(String));
+
+    return sortRows(photos.filter(p => {
+      const pids = [p.product_id, p.model_id, p.catalog_product_id, p.catalog_product]
+        .filter(v => v !== undefined && v !== null && String(v) !== '')
+        .map(String);
+      return pids.some(id => ids.has(id));
+    }))
       .map(p => p.image_url || p.url || p.path || p.file_path || p.photo_url || p.image || p.src)
       .filter(Boolean)
       .map(photoUrl);
@@ -80,7 +79,7 @@
     if (!urls.length) return `<div class="mot-no-photo">Fotografiile acestui model nu sunt disponibile.</div>`;
     return `<div class="mot-gallery">${urls.slice(0,12).map((u,i) => `
       <button type="button" class="mot-photo" data-full="${esc(u)}" aria-label="Vezi fotografia ${i+1}">
-        <img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy" onerror="this.closest('.mot-photo').style.display='none'">
+        <img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy" onerror="this.closest('.mot-photo').classList.add('mot-image-error')">
       </button>`).join('')}</div>`;
   }
 
@@ -105,6 +104,7 @@
       e.stopPropagation();
       const card = btn.closest('[data-model-id]');
       selectedModel = products.find(p => String(p.id) === String(card.dataset.modelId)) || null;
+      selectedPhotoUrl = '';
       if ($('modelChoice')) $('modelChoice').value = selectedModel?.name || '';
       render();
       renderSummarySafe();
@@ -115,48 +115,55 @@
       e.stopPropagation();
       const card = btn.closest('[data-model-id]');
       const model = products.find(p => String(p.id) === String(card?.dataset.modelId));
-      openLightbox(btn.dataset.full, model?.name || 'Model set moț');
+      openLightbox(btn.dataset.full, model);
     });
   }
 
-  function openLightbox(url, title) {
+  function openLightbox(url, model) {
     let box = $('motLightbox');
     if (!box) {
       box = document.createElement('div');
       box.id = 'motLightbox';
       box.className = 'mot-lightbox';
-      box.innerHTML = '<button type="button" class="mot-lightbox-close" aria-label="Închide">×</button><div class="mot-lightbox-inner"><img alt="Fotografie model"><h3></h3><button type="button" class="mot-lightbox-select">Alege această fotografie</button></div>';
+      box.innerHTML = `<button type="button" class="mot-lightbox-close" aria-label="Închide">×</button>
+        <div class="mot-lightbox-inner">
+          <img alt="Fotografie model">
+          <h3></h3>
+          <button type="button" class="mot-lightbox-select">Alege această fotografie</button>
+        </div>`;
       document.body.appendChild(box);
       box.addEventListener('click', e => {
         if (e.target === box || e.target.classList.contains('mot-lightbox-close')) box.classList.remove('open');
       });
       box.querySelector('.mot-lightbox-select').onclick = e => {
         e.stopPropagation();
-        const urlNow = box.querySelector('img').src;
-        if (selectedModel) {
-          selectedModel.selectedPhotoUrl = urlNow;
-          box.classList.remove('open');
-          renderSummarySafe();
+        const img = box.querySelector('img');
+        if (!selectedModel || String(selectedModel.id) !== String(box.dataset.modelId)) {
+          selectedModel = products.find(p => String(p.id) === String(box.dataset.modelId)) || selectedModel;
         }
+        selectedPhotoUrl = img.src;
+        if ($('modelChoice')) $('modelChoice').value = selectedModel?.name || '';
+        box.classList.remove('open');
+        render();
+        renderSummarySafe();
+        $('personalizare')?.scrollIntoView({behavior:'smooth', block:'start'});
       };
     }
+    box.dataset.modelId = model?.id ?? '';
     box.querySelector('img').src = url;
-    box.querySelector('h3').textContent = title;
+    box.querySelector('img').alt = model?.name || 'Fotografie model';
+    box.querySelector('h3').textContent = model?.name || 'Model set moț';
     box.classList.add('open');
   }
 
   function installCustomOptions() {
     const custom = $('personalizare');
     if (!custom) return;
-
     const form = custom.querySelector('.form-grid');
     if (!form) return;
 
     const oldTray = $('tray');
-    if (oldTray) {
-      const wrap = oldTray.closest('label');
-      if (wrap) wrap.remove();
-    }
+    if (oldTray) oldTray.closest('label')?.remove();
 
     let trayBox = $('motCustomTrayBox');
     if (!trayBox) {
@@ -202,7 +209,7 @@
 
   function renderSummarySafe() {
     if (typeof window.renderSummary === 'function') {
-      try { window.renderSummary(); } catch(e) { console.warn(e); }
+      try { window.renderSummary(); } catch (e) { console.warn(e); }
     }
     updateCustomSummary();
   }
@@ -212,9 +219,8 @@
     if (box) box.querySelectorAll('[data-tray]').forEach(b => b.classList.toggle('active', b.dataset.tray === selectedTray));
     const total = $('total');
     if (total) {
-      const shipping = 5.95;
       const photo = selectedChildPhoto === 'da' ? 5 : 0;
-      total.textContent = `£${(Number(selectedTray) + photo + shipping).toFixed(2)}`;
+      total.textContent = `£${(Number(selectedTray) + photo + 5.95).toFixed(2)}`;
     }
   }
 
@@ -236,7 +242,7 @@
       const address = $('address')?.value?.trim() || '';
       const postcode = $('postcode')?.value?.trim() || '';
       const modelName = selectedModel?.name || $('modelChoice')?.value?.trim() || 'Tematică la alegere';
-      const modelPhoto = selectedModel?.selectedPhotoUrl || getProductPhotos(selectedModel)[0] || '';
+      const modelPhoto = selectedPhotoUrl || getProductPhotos(selectedModel)[0] || '';
       const photoChoice = selectedChildPhoto === 'da' ? 'Da, fotografie copil +£5' : 'Fără fotografie';
 
       const lines = [
@@ -260,23 +266,25 @@
   }
 
   async function load() {
+    const grid = $('modelGrid');
+    if (!grid) return;
     try {
-      /* Nu mai filtrăm printr-un nume exact de categorie. Asta era cauza principală
-         pentru care lista putea rămâne goală atunci când baza folosea o altă formă
-         a denumirii (cu/fără diacritice sau alt separator). Luăm toate produsele
-         publice și selectăm local strict modelele de moț după câmpurile lor. */
+      /* Nu folosim ORDER BY în requesturile REST: sortarea se face local.
+         Astfel catalogul nu depinde de existența coloanelor display_order/created_at. */
       const [allProducts, photoRows] = await Promise.all([
-        api('/catalog_products?select=*&order=display_order.asc,created_at.desc'),
-        api('/catalog_product_photos?select=*&order=display_order.asc')
+        api('/catalog_products?select=*'),
+        api('/catalog_product_photos?select=*')
       ]);
 
-      products = (Array.isArray(allProducts) ? allProducts : []).filter(p => {
-        const text = norm([
-          p.category, p.subcategory, p.sub_category, p.product_category,
-          p.name, p.description
-        ].filter(Boolean).join(' '));
-        return text.includes('mot') || text.includes('motul') || text.includes('mot ');
+      const rawProducts = Array.isArray(allProducts) ? allProducts : [];
+      const exactGirls = rawProducts.filter(p => norm(p.category) === norm('Seturi pentru Moț – Fetiță'));
+      const exactBoys = rawProducts.filter(p => norm(p.category) === norm('Seturi pentru Moț – Băiat'));
+      const motProducts = rawProducts.filter(p => {
+        const text = norm([p.category,p.subcategory,p.sub_category,p.product_category,p.name,p.description].filter(Boolean).join(' '));
+        return text.includes('seturi pentru mot') || text.includes('set pentru mot') || /\bmot\b/.test(text);
       });
+
+      products = sortRows((exactGirls.length || exactBoys.length) ? [...exactGirls, ...exactBoys] : motProducts);
       photos = Array.isArray(photoRows) ? photoRows : [];
 
       render();
@@ -284,8 +292,18 @@
       installWhatsAppOrder();
     } catch (err) {
       console.error('Seturi pentru moț:', err);
-      const grid = $('modelGrid');
-      if (grid) grid.innerHTML = '<div class="mot-empty">Modelele și fotografiile nu au putut fi încărcate momentan. Reîncarcă pagina.</div>';
+      /* Dacă fotografiile au o problemă temporară, nu ascundem întreaga zonă de modele. */
+      try {
+        const rawProducts = await api('/catalog_products?select=*');
+        products = sortRows((Array.isArray(rawProducts) ? rawProducts : []).filter(p => /seturi pentru mot|set pentru mot|\bmot\b/i.test(norm([p.category,p.subcategory,p.sub_category,p.name].filter(Boolean).join(' ')))));
+        photos = [];
+        render();
+        installCustomOptions();
+        installWhatsAppOrder();
+      } catch (fallbackErr) {
+        console.error('Fallback Seturi pentru moț:', fallbackErr);
+        grid.innerHTML = '<div class="mot-empty">Modelele nu au putut fi încărcate momentan. Reîncarcă pagina.</div>';
+      }
     }
   }
 
@@ -293,27 +311,36 @@
   style.textContent = `
     .mot-model-card{background:#fff;border:1px solid #eadbd5;border-radius:18px;padding:10px;overflow:hidden;box-shadow:0 8px 24px rgba(105,61,67,.06)}
     .mot-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;background:#f8eee9;border-radius:13px;padding:5px;overflow:hidden}
-    .mot-photo{border:0;padding:0;background:transparent;cursor:zoom-in;overflow:hidden;border-radius:8px;display:block}
+    .mot-photo{border:0;padding:0;background:transparent;cursor:zoom-in;overflow:hidden;border-radius:8px;display:block;min-width:0}
     .mot-photo:first-child{grid-column:span 2;grid-row:span 2}
     .mot-photo img{display:block;width:100%;aspect-ratio:1;object-fit:cover;transition:transform .2s ease}
     .mot-photo:hover img{transform:scale(1.035)}
+    .mot-photo.mot-image-error{background:#f3e5e1;min-height:80px}
     .mot-model-info{padding:5px 3px 3px}.mot-model-info h3{font:500 22px/1.2 Georgia,serif!important;color:#68434a!important;margin:10px 0 5px!important}
     .mot-price{font-weight:800;color:#7b3f4b;margin:0 0 8px}.mot-description{font-size:12px;line-height:1.5;color:#806f70;margin:0 0 10px}
     .mot-select{width:100%;border:1px solid #c98a98;border-radius:10px;background:#fff;color:#7b3f4b;padding:10px;font-weight:800;cursor:pointer}
     .mot-selected{border-color:#c4778b;box-shadow:0 10px 28px rgba(123,63,75,.14)}.mot-selected .mot-select{background:#c4778b;color:#fff}
     .mot-empty,.mot-no-photo{padding:30px;text-align:center;color:#806f70;background:#f8eee9;border-radius:13px}
-    .mot-custom-options{margin:18px 0;padding:14px;border:1px solid #eadbd5;border-radius:14px;background:#fbf3f0}
-    .mot-custom-options h3{margin:0 0 5px;font:600 17px Georgia,serif;color:#68434a}.mot-custom-note{margin:0 0 10px;color:#806f70;font-size:12px}
-    .mot-choice-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mot-choice{border:1px solid #e3cfd0;background:#fff;color:#7b3f4b;border-radius:10px;padding:11px 8px;font-weight:800;cursor:pointer}.mot-choice.active{background:#7b3f4b;color:#fff;border-color:#7b3f4b}
-    .mot-lightbox{position:fixed;inset:0;background:rgba(55,35,39,.82);display:none;align-items:center;justify-content:center;padding:25px;z-index:9999}.mot-lightbox.open{display:flex}
-    .mot-lightbox-inner{position:relative;max-width:min(1000px,94vw);max-height:92vh;background:#fffaf7;border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px}.mot-lightbox img{max-width:90vw;max-height:75vh;object-fit:contain;border-radius:10px}.mot-lightbox-inner h3{margin:0;color:#68434a;font:500 21px Georgia,serif}.mot-lightbox-select{border:0;background:#7b3f4b;color:#fff;border-radius:20px;padding:10px 20px;font-weight:800;cursor:pointer}.mot-lightbox-close{position:absolute;top:18px;right:20px;width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#7b3f4b;font-size:28px;cursor:pointer;z-index:10000}
-    @media(max-width:700px){.mot-choice-row{grid-template-columns:1fr}.mot-gallery{grid-template-columns:repeat(3,1fr)}.mot-model-info h3{font-size:18px!important}}
+    .mot-custom-options{margin:18px 0;padding:16px;border:1px solid #eadbd5;border-radius:14px;background:#fffaf8}
+    .mot-custom-options h3{margin:0 0 5px;color:#68434a;font:500 20px Georgia,serif}
+    .mot-custom-note{margin:0 0 12px;color:#806f70;font-size:12px}
+    .mot-choice-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .mot-choice{border:1px solid #d8aeb6;border-radius:10px;background:#fff;color:#7b3f4b;padding:11px 10px;font-weight:800;cursor:pointer}
+    .mot-choice.active{background:#7b3f4b;color:#fff;border-color:#7b3f4b}
+    .mot-lightbox{position:fixed;inset:0;background:rgba(55,35,39,.82);display:none;align-items:center;justify-content:center;padding:25px;z-index:9999}
+    .mot-lightbox.open{display:flex}.mot-lightbox-inner{position:relative;max-width:min(1100px,94vw);max-height:94vh;background:#fffaf7;border-radius:18px;padding:16px;box-shadow:0 15px 50px rgba(0,0,0,.35);text-align:center}
+    .mot-lightbox img{display:block;max-width:min(88vw,1000px);max-height:78vh;object-fit:contain;border-radius:12px;margin:auto}
+    .mot-lightbox h3{margin:10px 0;color:#68434a;font:500 21px Georgia,serif}
+    .mot-lightbox-select{border:1px solid #c98a98;border-radius:10px;background:#7b3f4b;color:#fff;padding:10px 18px;font-weight:800;cursor:pointer}
+    .mot-lightbox-close{position:absolute;top:10px;right:10px;width:40px;height:40px;border:1px solid #dfc4c7;border-radius:50%;background:#fff;color:#7b3f4b;font-size:26px;cursor:pointer;z-index:2}
+    @media(max-width:700px){.mot-gallery{grid-template-columns:repeat(3,1fr)}.mot-model-info h3{font-size:18px!important}.mot-select{font-size:12px;padding:9px 6px}.mot-choice-row{grid-template-columns:1fr}.mot-lightbox{padding:10px}.mot-lightbox-inner{padding:10px}.mot-lightbox img{max-width:92vw;max-height:72vh}}
   `;
   document.head.appendChild(style);
 
   document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
     genderFilter = tab.dataset.gender;
     selectedModel = null;
+    selectedPhotoUrl = '';
     render();
   }));
 
