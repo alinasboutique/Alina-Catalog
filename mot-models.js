@@ -118,10 +118,10 @@
       .mot-empty,.mot-no-photo{padding:30px;text-align:center;color:#806f70;background:#f8eee9;border-radius:13px}
       .mot-lightbox{position:fixed;inset:0;background:rgba(55,35,39,.82);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
       .mot-lightbox.open{display:flex}
-      .mot-lightbox-inner{position:relative;width:min(1000px,94vw);max-height:94vh;background:#fffaf7;border-radius:16px;padding:14px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-      .mot-lightbox-image{display:block;max-width:90vw;max-height:70vh;object-fit:contain;border-radius:10px;margin:auto}
+      .mot-lightbox-inner{position:relative;box-sizing:border-box;width:min(1100px,94vw);max-height:94dvh;min-height:0;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;background:#fffaf7;border-radius:16px;padding:14px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+      .mot-lightbox-image{display:block;box-sizing:border-box;width:100%;height:auto;max-width:100%;max-height:calc(94dvh - 190px);min-height:0;flex:1 1 auto;object-fit:contain;border-radius:10px;margin:0 auto}
       .mot-lightbox-title{font:500 20px Georgia,serif;color:#68434a;margin:9px 50px 8px}
-      .mot-lightbox-thumbs{display:flex;gap:7px;overflow-x:auto;padding:3px;justify-content:center}
+      .mot-lightbox-thumbs{display:flex;flex:0 0 auto;min-width:0;max-width:100%;gap:7px;overflow-x:auto;overflow-y:hidden;padding:3px;justify-content:flex-start}
       .mot-lightbox-thumbs button{border:2px solid transparent;background:#fff;padding:2px;border-radius:8px;cursor:pointer;flex:0 0 66px}
       .mot-lightbox-thumbs button.active{border-color:#c4778b}
       .mot-lightbox-thumbs img{width:60px;height:60px;object-fit:cover;border-radius:6px;display:block}
@@ -141,7 +141,7 @@
         .mot-model-info h3{font-size:19px!important}
         .mot-lightbox{padding:10px}
         .mot-lightbox-inner{padding:10px}
-        .mot-lightbox-image{max-width:92vw;max-height:66vh}
+        .mot-lightbox-image{max-width:100%;max-height:calc(94dvh - 175px)}
         .mot-choice-row,.mot-custom-photo-row{grid-template-columns:1fr}
         .mot-lightbox-thumbs{justify-content:flex-start}
       }
