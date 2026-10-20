@@ -1,7 +1,7 @@
-/* SETURI PENTRU MOT — folosim exact datele din catalogul actual.
-   IMPORTANT: nu modificam designul catalogului si nu mutam produsele in pagina principala.
-   Modelele sunt in catalog_products, fotografiile in catalog_product_photos,
-   iar fotografiile publice sunt in bucket-ul catalog. */
+/* SETURI PENTRU MOT — folosim catalogul actual.
+   Nu modificam designul paginii principale.
+   Modelele sunt citite din catalog_products, iar fotografiile din catalog_product_photos.
+*/
 (() => {
   const SB_URL = 'https://zbfqhmiqjcvicqlidswo.supabase.co';
   const SB_KEY = 'sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
@@ -32,8 +32,14 @@
 
   function gender(product) {
     const text = norm([
-      product.gender, product.sex, product.subcategory, product.sub_category,
-      product.product_gender, product.audience, product.category, product.name,
+      product.gender,
+      product.sex,
+      product.subcategory,
+      product.sub_category,
+      product.product_gender,
+      product.audience,
+      product.category,
+      product.name,
       product.description
     ].filter(Boolean).join(' '));
     if (/fetit|fetita|fetite|girl|fata/.test(text)) return 'fata';
@@ -46,24 +52,35 @@
   let genderFilter = 'fata';
   let selectedModel = null;
   let selectedTray = '70';
-  let selectedChildPhoto = '0';
+  let selectedChildPhoto = 'nu';
+
+  function productPhotoRows(product) {
+    if (!product) return [];
+    const ids = new Set([
+      String(product.id ?? ''),
+      String(product.product_id ?? ''),
+      String(product.model_id ?? '')
+    ].filter(Boolean));
+    return photos.filter(p => {
+      const photoIds = [p.product_id, p.model_id, p.catalog_product_id, p.catalog_product].filter(v => v !== undefined && v !== null).map(String);
+      return photoIds.some(id => ids.has(id));
+    });
+  }
 
   function getProductPhotos(product) {
-    const id = String(product.id);
-    return photos
-      .filter(p => String(p.product_id ?? p.model_id ?? '') === id)
-      .sort((a,b) => Number(a.display_order || 0) - Number(b.display_order || 0))
-      .map(p => p.image_url || p.url || p.path || p.file_path || p.photo_url)
+    return productPhotoRows(product)
+      .sort((a,b) => Number(a.display_order || a.sort_order || 0) - Number(b.display_order || b.sort_order || 0))
+      .map(p => p.image_url || p.url || p.path || p.file_path || p.photo_url || p.image || p.src)
       .filter(Boolean)
       .map(photoUrl);
   }
 
   function photoGallery(product) {
     const urls = getProductPhotos(product);
-    if (!urls.length) return `<div class="mot-no-photo">Fotografia modelului nu este disponibilă.</div>`;
+    if (!urls.length) return `<div class="mot-no-photo">Fotografiile acestui model nu sunt disponibile.</div>`;
     return `<div class="mot-gallery">${urls.slice(0,12).map((u,i) => `
       <button type="button" class="mot-photo" data-full="${esc(u)}" aria-label="Vezi fotografia ${i+1}">
-        <img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy">
+        <img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy" onerror="this.closest('.mot-photo').style.display='none'">
       </button>`).join('')}</div>`;
   }
 
@@ -71,6 +88,7 @@
     const grid = $('modelGrid');
     if (!grid) return;
     const list = products.filter(p => gender(p) === genderFilter);
+
     grid.innerHTML = list.length ? list.map(p => `
       <article class="mot-model-card ${selectedModel?.id === p.id ? 'mot-selected' : ''}" data-model-id="${esc(p.id)}">
         ${photoGallery(p)}
@@ -89,12 +107,15 @@
       selectedModel = products.find(p => String(p.id) === String(card.dataset.modelId)) || null;
       if ($('modelChoice')) $('modelChoice').value = selectedModel?.name || '';
       render();
+      renderSummarySafe();
       $('personalizare')?.scrollIntoView({behavior:'smooth', block:'start'});
     });
 
     grid.querySelectorAll('.mot-photo').forEach(btn => btn.onclick = e => {
       e.stopPropagation();
-      openLightbox(btn.dataset.full, btn.closest('[data-model-id]')?.querySelector('h3')?.textContent || 'Model set moț');
+      const card = btn.closest('[data-model-id]');
+      const model = products.find(p => String(p.id) === String(card?.dataset.modelId));
+      openLightbox(btn.dataset.full, model?.name || 'Model set moț');
     });
   }
 
@@ -115,7 +136,7 @@
         if (selectedModel) {
           selectedModel.selectedPhotoUrl = urlNow;
           box.classList.remove('open');
-          updateCustomSummary();
+          renderSummarySafe();
         }
       };
     }
@@ -129,6 +150,8 @@
     if (!custom) return;
 
     const form = custom.querySelector('.form-grid');
+    if (!form) return;
+
     const oldTray = $('tray');
     if (oldTray) {
       const wrap = oldTray.closest('label');
@@ -141,34 +164,46 @@
       trayBox.id = 'motCustomTrayBox';
       trayBox.className = 'mot-custom-options';
       trayBox.innerHTML = `
-        <h3>Alege tava</h3>
+        <h3>Dacă nu găsești tematica dorită</h3>
+        <p class="mot-custom-note">Scrie tema dorită și alege tipul de tavă.</p>
         <div class="mot-choice-row">
           <button type="button" class="mot-choice active" data-tray="70">Tavă dreptunghiulară £70</button>
           <button type="button" class="mot-choice" data-tray="80">Tavă rotundă £80</button>
         </div>`;
-      form?.insertAdjacentElement('afterend', trayBox);
+      form.insertAdjacentElement('afterend', trayBox);
     }
 
     trayBox.querySelectorAll('[data-tray]').forEach(btn => btn.onclick = () => {
       selectedTray = btn.dataset.tray;
       trayBox.querySelectorAll('[data-tray]').forEach(x => x.classList.remove('active'));
       btn.classList.add('active');
-      updateCustomSummary();
+      renderSummarySafe();
     });
 
     const photoBox = custom.querySelector('.photo-option');
     if (photoBox) {
       photoBox.querySelectorAll('.photo-choice-btn').forEach(btn => btn.onclick = () => {
-        selectedChildPhoto = btn.dataset.photo || '0';
+        selectedChildPhoto = btn.dataset.photo === 'da' ? 'da' : 'nu';
         photoBox.querySelectorAll('.photo-choice-btn').forEach(x => x.classList.remove('active'));
         btn.classList.add('active');
-        updateCustomSummary();
+        renderSummarySafe();
       });
     }
 
-    const dateLabel = custom.querySelector('#childDate')?.closest('label');
-    if (dateLabel) dateLabel.firstChild.textContent = 'Data (opțional)';
+    const dateInput = $('childDate');
+    const dateLabel = dateInput?.closest('label');
+    if (dateLabel) {
+      const firstText = Array.from(dateLabel.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+      if (firstText) firstText.textContent = 'Data (opțional)';
+    }
 
+    renderSummarySafe();
+  }
+
+  function renderSummarySafe() {
+    if (typeof window.renderSummary === 'function') {
+      try { window.renderSummary(); } catch(e) { console.warn(e); }
+    }
     updateCustomSummary();
   }
 
@@ -176,22 +211,34 @@
     const box = $('motCustomTrayBox');
     if (box) box.querySelectorAll('[data-tray]').forEach(b => b.classList.toggle('active', b.dataset.tray === selectedTray));
     const total = $('total');
-    if (total) total.textContent = `£${(Number(selectedTray) + Number(selectedChildPhoto) + 5.95).toFixed(2)}`;
+    if (total) {
+      const shipping = 5.95;
+      const photo = selectedChildPhoto === 'da' ? 5 : 0;
+      total.textContent = `£${(Number(selectedTray) + photo + shipping).toFixed(2)}`;
+    }
   }
 
   function installWhatsAppOrder() {
     const button = $('orderWhatsApp');
-    if (!button) return;
+    if (!button || button.dataset.motWhatsappInstalled === '1') return;
+    button.dataset.motWhatsappInstalled = '1';
+
     button.addEventListener('click', e => {
       e.preventDefault();
       e.stopImmediatePropagation();
+
       const name = $('childName')?.value?.trim() || '';
       const date = $('childDate')?.value?.trim() || '';
       const theme = $('theme')?.value?.trim() || '';
       const message = $('trayMessage')?.value?.trim() || '';
-      const photoChoice = selectedChildPhoto === '5' ? 'Da, fotografie copil +£5' : 'Fără fotografie';
+      const deliveryName = $('deliveryName')?.value?.trim() || '';
+      const phone = $('phone')?.value?.trim() || '';
+      const address = $('address')?.value?.trim() || '';
+      const postcode = $('postcode')?.value?.trim() || '';
       const modelName = selectedModel?.name || $('modelChoice')?.value?.trim() || 'Tematică la alegere';
-      const modelPhoto = selectedModel?.selectedPhotoUrl || getProductPhotos(selectedModel || {})[0] || '';
+      const modelPhoto = selectedModel?.selectedPhotoUrl || getProductPhotos(selectedModel)[0] || '';
+      const photoChoice = selectedChildPhoto === 'da' ? 'Da, fotografie copil +£5' : 'Fără fotografie';
+
       const lines = [
         'Bună! Doresc să comand un set pentru moț.',
         `Model: ${modelName}`,
@@ -201,30 +248,44 @@
         theme ? `Tema: ${theme}` : '',
         message ? `Mesaj pentru tăviță: ${message}` : '',
         `Fotografie copil: ${photoChoice}`,
+        deliveryName ? `Nume livrare: ${deliveryName}` : '',
+        phone ? `Telefon: ${phone}` : '',
+        address ? `Adresă: ${address}` : '',
+        postcode ? `Cod poștal: ${postcode}` : '',
         modelPhoto ? `Fotografia modelului ales: ${modelPhoto}` : ''
       ].filter(Boolean).join('\n');
+
       window.open('https://wa.me/447742444493?text=' + encodeURIComponent(lines), '_blank', 'noopener');
     }, true);
   }
 
   async function load() {
     try {
-      const girl = encodeURIComponent('Seturi pentru Moț – Fetiță');
-      const boy = encodeURIComponent('Seturi pentru Moț – Băiat');
-      const [girls, boys, photoRows] = await Promise.all([
-        api(`/catalog_products?select=*&category=eq.${girl}&order=display_order.asc,created_at.desc`),
-        api(`/catalog_products?select=*&category=eq.${boy}&order=display_order.asc,created_at.desc`),
+      /* Nu mai filtrăm printr-un nume exact de categorie. Asta era cauza principală
+         pentru care lista putea rămâne goală atunci când baza folosea o altă formă
+         a denumirii (cu/fără diacritice sau alt separator). Luăm toate produsele
+         publice și selectăm local strict modelele de moț după câmpurile lor. */
+      const [allProducts, photoRows] = await Promise.all([
+        api('/catalog_products?select=*&order=display_order.asc,created_at.desc'),
         api('/catalog_product_photos?select=*&order=display_order.asc')
       ]);
-      products = [...girls, ...boys];
+
+      products = (Array.isArray(allProducts) ? allProducts : []).filter(p => {
+        const text = norm([
+          p.category, p.subcategory, p.sub_category, p.product_category,
+          p.name, p.description
+        ].filter(Boolean).join(' '));
+        return text.includes('mot') || text.includes('motul') || text.includes('mot ');
+      });
       photos = Array.isArray(photoRows) ? photoRows : [];
+
       render();
       installCustomOptions();
       installWhatsAppOrder();
     } catch (err) {
       console.error('Seturi pentru moț:', err);
       const grid = $('modelGrid');
-      if (grid) grid.innerHTML = '<div class="mot-empty">Modelele și fotografiile nu au putut fi încărcate momentan.</div>';
+      if (grid) grid.innerHTML = '<div class="mot-empty">Modelele și fotografiile nu au putut fi încărcate momentan. Reîncarcă pagina.</div>';
     }
   }
 
@@ -242,7 +303,7 @@
     .mot-selected{border-color:#c4778b;box-shadow:0 10px 28px rgba(123,63,75,.14)}.mot-selected .mot-select{background:#c4778b;color:#fff}
     .mot-empty,.mot-no-photo{padding:30px;text-align:center;color:#806f70;background:#f8eee9;border-radius:13px}
     .mot-custom-options{margin:18px 0;padding:14px;border:1px solid #eadbd5;border-radius:14px;background:#fbf3f0}
-    .mot-custom-options h3{margin:0 0 10px;font:600 17px Georgia,serif;color:#68434a}
+    .mot-custom-options h3{margin:0 0 5px;font:600 17px Georgia,serif;color:#68434a}.mot-custom-note{margin:0 0 10px;color:#806f70;font-size:12px}
     .mot-choice-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mot-choice{border:1px solid #e3cfd0;background:#fff;color:#7b3f4b;border-radius:10px;padding:11px 8px;font-weight:800;cursor:pointer}.mot-choice.active{background:#7b3f4b;color:#fff;border-color:#7b3f4b}
     .mot-lightbox{position:fixed;inset:0;background:rgba(55,35,39,.82);display:none;align-items:center;justify-content:center;padding:25px;z-index:9999}.mot-lightbox.open{display:flex}
     .mot-lightbox-inner{position:relative;max-width:min(1000px,94vw);max-height:92vh;background:#fffaf7;border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px}.mot-lightbox img{max-width:90vw;max-height:75vh;object-fit:contain;border-radius:10px}.mot-lightbox-inner h3{margin:0;color:#68434a;font:500 21px Georgia,serif}.mot-lightbox-select{border:0;background:#7b3f4b;color:#fff;border-radius:20px;padding:10px 20px;font-weight:800;cursor:pointer}.mot-lightbox-close{position:absolute;top:18px;right:20px;width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#7b3f4b;font-size:28px;cursor:pointer;z-index:10000}
