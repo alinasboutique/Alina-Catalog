@@ -314,6 +314,9 @@
       form.insertAdjacentElement('afterend', box);
     }
 
+    // Remove legacy duplicate photo choices from older generated markup.
+    box.querySelectorAll('.mot-custom-photo-row,[data-custom-photo]').forEach(el => el.remove());
+
     box.querySelectorAll('[data-custom-tray]').forEach(btn => {
       btn.onclick = () => {
         selectedTray = btn.dataset.customTray;
@@ -424,7 +427,7 @@
       card.querySelector('.mot-category-cover')?.remove();
       photo.className = 'mot-category-cover';
       photo.alt = 'Set pentru moț personalizat – Alina’s Handmade Boutique';
-      photo.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover;object-position:center';
+      photo.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover;object-position:center;position:relative;z-index:2';
       card.insertBefore(photo, card.firstChild);
     };
     photo.src = url;
