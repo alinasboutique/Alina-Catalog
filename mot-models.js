@@ -66,7 +66,7 @@
       model.category, model.category_name, model.subcategory, model.subcategory_name,
       model.gender, model.sex, model.type, model.collection, model.section, model.name
     ].filter(Boolean).join(' '));
-    return /fetit|fata|fetite|girl/.test(text) || text === 'f';
+    return /fetit|fata|fete|girl|female/.test(text) || text === 'f';
   }
 
   function isBoy(model) {
@@ -74,7 +74,7 @@
       model.category, model.category_name, model.subcategory, model.subcategory_name,
       model.gender, model.sex, model.type, model.collection, model.section, model.name
     ].filter(Boolean).join(' '));
-    return /baiat|baieti|baietel|boy|masculin|mascul/.test(text) || text === 'b';
+    return /baiat|baieti|baietel|boy|male|masculin|mascul/.test(text) || text === 'b';
   }
 
   function isMot(model) {
@@ -214,7 +214,6 @@
     if (!grid) return;
 
     const list = products.filter(model => {
-      if (!isMot(model)) return false;
       return genderFilter === 'fetita' ? isGirl(model) : isBoy(model);
     });
 
