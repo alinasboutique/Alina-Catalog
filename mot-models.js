@@ -1,7 +1,6 @@
 /* SETURI PENTRU MOȚ — funcționalitățile sunt izolate aici.
    Nu modificăm designul paginii principale.
-   Produsele și fotografiile sunt încărcate din catalogul existent.
-*/
+   Modelele și fotografiile sunt încărcate din catalogul existent. */
 (() => {
   const SB_URL = 'https://zbfqhmiqjcvicqlidswo.supabase.co';
   const SB_KEY = 'sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
@@ -50,7 +49,7 @@
   let selectedChildPhoto = 'nu';
 
   function sortRows(rows) {
-    return [...rows].sort((a,b) => {
+    return [...rows].sort((a, b) => {
       const ao = Number(a.display_order ?? a.sort_order ?? 999999);
       const bo = Number(b.display_order ?? b.sort_order ?? 999999);
       return ao - bo;
@@ -77,8 +76,8 @@
   function photoGallery(product) {
     const urls = getProductPhotos(product);
     if (!urls.length) return `<div class="mot-no-photo">Fotografiile acestui model nu sunt disponibile.</div>`;
-    return `<div class="mot-gallery">${urls.slice(0,12).map((u,i) => `
-      <button type="button" class="mot-photo" data-full="${esc(u)}" aria-label="Vezi fotografia ${i+1}">
+    return `<div class="mot-gallery">${urls.slice(0, 12).map((u, i) => `
+      <button type="button" class="mot-photo" data-full="${esc(u)}" aria-label="Vezi fotografia ${i + 1}">
         <img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy" onerror="this.closest('.mot-photo').classList.add('mot-image-error')">
       </button>`).join('')}</div>`;
   }
@@ -108,7 +107,7 @@
       if ($('modelChoice')) $('modelChoice').value = selectedModel?.name || '';
       render();
       renderSummarySafe();
-      $('personalizare')?.scrollIntoView({behavior:'smooth', block:'start'});
+      $('personalizare')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     grid.querySelectorAll('.mot-photo').forEach(btn => btn.onclick = e => {
@@ -138,15 +137,13 @@
       box.querySelector('.mot-lightbox-select').onclick = e => {
         e.stopPropagation();
         const img = box.querySelector('img');
-        if (!selectedModel || String(selectedModel.id) !== String(box.dataset.modelId)) {
-          selectedModel = products.find(p => String(p.id) === String(box.dataset.modelId)) || selectedModel;
-        }
+        selectedModel = products.find(p => String(p.id) === String(box.dataset.modelId)) || selectedModel;
         selectedPhotoUrl = img.src;
         if ($('modelChoice')) $('modelChoice').value = selectedModel?.name || '';
         box.classList.remove('open');
         render();
         renderSummarySafe();
-        $('personalizare')?.scrollIntoView({behavior:'smooth', block:'start'});
+        $('personalizare')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
     }
     box.dataset.modelId = model?.id ?? '';
@@ -162,8 +159,10 @@
     const form = custom.querySelector('.form-grid');
     if (!form) return;
 
+    /* Nu ștergem label-ul "Tema dorită". În codul anterior era șters împreună
+       cu inputul ascuns #tray, ceea ce elimina și câmpul în care clienta scrie tema. */
     const oldTray = $('tray');
-    if (oldTray) oldTray.closest('label')?.remove();
+    if (oldTray) oldTray.type = 'hidden';
 
     let trayBox = $('motCustomTrayBox');
     if (!trayBox) {
@@ -172,7 +171,7 @@
       trayBox.className = 'mot-custom-options';
       trayBox.innerHTML = `
         <h3>Dacă nu găsești tematica dorită</h3>
-        <p class="mot-custom-note">Scrie tema dorită și alege tipul de tavă.</p>
+        <p class="mot-custom-note">Scrie tema dorită în câmpul de mai sus și alege tipul de tavă.</p>
         <div class="mot-choice-row">
           <button type="button" class="mot-choice active" data-tray="70">Tavă dreptunghiulară £70</button>
           <button type="button" class="mot-choice" data-tray="80">Tavă rotundă £80</button>
@@ -182,6 +181,7 @@
 
     trayBox.querySelectorAll('[data-tray]').forEach(btn => btn.onclick = () => {
       selectedTray = btn.dataset.tray;
+      if (oldTray) oldTray.value = selectedTray;
       trayBox.querySelectorAll('[data-tray]').forEach(x => x.classList.remove('active'));
       btn.classList.add('active');
       renderSummarySafe();
@@ -220,7 +220,9 @@
     const total = $('total');
     if (total) {
       const photo = selectedChildPhoto === 'da' ? 5 : 0;
-      total.textContent = `£${(Number(selectedTray) + photo + 5.95).toFixed(2)}`;
+      const shirts = document.querySelectorAll('#shirtRows .shirt-row').length;
+      const shipping = shirts ? 8.95 : 5.95;
+      total.textContent = `Total: £${(Number(selectedTray) + photo + shipping).toFixed(2)}`;
     }
   }
 
@@ -268,42 +270,41 @@
   async function load() {
     const grid = $('modelGrid');
     if (!grid) return;
+
+    /* Instalăm opțiunile înainte de orice request. Astfel un eșec temporar al
+       bazei de date nu poate șterge controalele din formular. */
+    installCustomOptions();
+    installWhatsAppOrder();
+
     try {
-      /* Nu folosim ORDER BY în requesturile REST: sortarea se face local.
-         Astfel catalogul nu depinde de existența coloanelor display_order/created_at. */
-      const [allProducts, photoRows] = await Promise.all([
-        api('/catalog_products?select=*'),
-        api('/catalog_product_photos?select=*')
-      ]);
-
-      const rawProducts = Array.isArray(allProducts) ? allProducts : [];
-      const exactGirls = rawProducts.filter(p => norm(p.category) === norm('Seturi pentru Moț – Fetiță'));
-      const exactBoys = rawProducts.filter(p => norm(p.category) === norm('Seturi pentru Moț – Băiat'));
-      const motProducts = rawProducts.filter(p => {
-        const text = norm([p.category,p.subcategory,p.sub_category,p.product_category,p.name,p.description].filter(Boolean).join(' '));
+      /* Folosim filtrul de categorie folosit de catalogul existent: "Seturi pentru Moț".
+         Nu presupunem că există categorii separate în baza de date pentru Fetiță/Băiat. */
+      let allProducts = await api(`/catalog_products?select=*&category=eq.${encodeURIComponent('Seturi pentru Moț')}`);
+      if (!Array.isArray(allProducts) || !allProducts.length) {
+        allProducts = await api('/catalog_products?select=*');
+      }
+      products = sortRows((Array.isArray(allProducts) ? allProducts : []).filter(p => {
+        const text = norm([p.category, p.subcategory, p.sub_category, p.product_category, p.name, p.description].filter(Boolean).join(' '));
         return text.includes('seturi pentru mot') || text.includes('set pentru mot') || /\bmot\b/.test(text);
-      });
+      }));
 
-      products = sortRows((exactGirls.length || exactBoys.length) ? [...exactGirls, ...exactBoys] : motProducts);
-      photos = Array.isArray(photoRows) ? photoRows : [];
+      try {
+        photos = await api('/catalog_product_photos?select=*');
+      } catch (photoErr) {
+        console.error('Fotografiile seturilor de moț:', photoErr);
+        photos = [];
+      }
 
       render();
       installCustomOptions();
       installWhatsAppOrder();
     } catch (err) {
       console.error('Seturi pentru moț:', err);
-      /* Dacă fotografiile au o problemă temporară, nu ascundem întreaga zonă de modele. */
-      try {
-        const rawProducts = await api('/catalog_products?select=*');
-        products = sortRows((Array.isArray(rawProducts) ? rawProducts : []).filter(p => /seturi pentru mot|set pentru mot|\bmot\b/i.test(norm([p.category,p.subcategory,p.sub_category,p.name].filter(Boolean).join(' ')))));
-        photos = [];
-        render();
-        installCustomOptions();
-        installWhatsAppOrder();
-      } catch (fallbackErr) {
-        console.error('Fallback Seturi pentru moț:', fallbackErr);
-        grid.innerHTML = '<div class="mot-empty">Modelele nu au putut fi încărcate momentan. Reîncarcă pagina.</div>';
-      }
+      products = [];
+      photos = [];
+      render();
+      installCustomOptions();
+      installWhatsAppOrder();
     }
   }
 
