@@ -18,7 +18,7 @@ categoryStyle.textContent=`
 .category-art-mini{position:absolute;z-index:1;width:78px;height:96px;border-radius:11px;background:linear-gradient(145deg,#fff,#f3dfd8);border:1px solid rgba(216,194,180,.75);box-shadow:0 7px 17px rgba(95,55,60,.10)}
 .category-art-mini::after{content:"";position:absolute;left:13px;right:13px;top:14px;height:5px;border-radius:4px;background:rgba(123,63,75,.13);box-shadow:0 12px 0 rgba(123,63,75,.08),0 24px 0 rgba(123,63,75,.06)}
 .mini-one{left:17%;top:27px;transform:rotate(-9deg)}.mini-two{right:15%;top:31px;transform:rotate(8deg)}.mini-three{right:25%;bottom:17px;transform:rotate(3deg);opacity:.78}
-.category-mot .category-art-main,.category-mot .category-art-mini,.category-mot .category-arrow{display:none!important}
+.category-mot .category-art-main,.category-mot .category-art-mini{display:none!important}
 .category-mot{background:#f8eee9!important}
 .category-real-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;display:block!important;z-index:2!important}
 .category-botez .category-art-main{background:linear-gradient(145deg,#fff,#eee9f5)}
@@ -35,16 +35,36 @@ categoryStyle.textContent=`
 .category-models{display:block;color:#9a7479;font:700 9px/1 Arial,sans-serif;letter-spacing:.9px;text-transform:uppercase}
 @media(max-width:1050px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:700px){.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}.category-visual{height:155px}.category-art-main{width:82px;height:82px;font-size:43px}.category-art-mini{width:55px;height:72px}.category-card-body{padding:12px}.category-card-body h3{font-size:17px!important}.category-card-body p{font-size:10px!important}}
+
+/* Galerie modele moț: fotografie mare + selectie clara */
+.model-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px!important}
+.model-card{position:relative;overflow:hidden}
+.model-photo{position:relative;height:270px!important}
+.model-photo img{cursor:zoom-in}
+.model-select-btn{display:block;width:calc(100% - 20px);margin:0 10px 10px;padding:11px 14px;border:1px solid #d8aeb6;border-radius:9px;background:#fff;color:#7b3f4b;font-weight:800;cursor:pointer}
+.model-card.selected .model-select-btn{background:#7b3f4b;color:#fff;border-color:#7b3f4b}
+.model-card.selected{border-color:#c98291!important;box-shadow:0 14px 34px rgba(100,55,62,.14)!important}
+.model-modal{position:fixed;inset:0;z-index:100;background:rgba(50,30,32,.72);display:none;align-items:center;justify-content:center;padding:22px}
+.model-modal.open{display:flex}
+.model-modal-inner{position:relative;max-width:min(900px,94vw);max-height:92vh;background:#fffaf7;border:1px solid #eadcd5;border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(30,20,20,.3)}
+.model-modal img{display:block;max-width:86vw;max-height:78vh;object-fit:contain;border-radius:12px}
+.model-modal-close{position:absolute;right:10px;top:10px;width:36px;height:36px;border:1px solid #dfc4c7;background:#fff;border-radius:50%;color:#7b3f4b;font-size:22px;cursor:pointer}
+.model-modal-title{text-align:center;margin:10px 45px 0;color:#7b3f4b;font:500 21px Georgia,serif}
+@media(max-width:700px){.model-grid{grid-template-columns:1fr!important}.model-photo{height:330px!important}.model-modal{padding:12px}.model-modal-inner{padding:10px}.model-modal img{max-width:92vw;max-height:78vh}}
 `;
 document.head.appendChild(categoryStyle);
 
+/* IMPORTANT: catalogul actual nu contine inca fisierele fotografiilor individuale.
+   Cand fotografiile sunt puse in repo, completam campul image cu calea exacta a fiecarui fisier. */
 const demoModels = [
-  {id:"f1",gender:"fata",name:"Model fetiță 01",image:""},
-  {id:"f2",gender:"fata",name:"Model fetiță 02",image:""},
-  {id:"f3",gender:"fata",name:"Model fetiță 03",image:""},
+  {id:"f1",gender:"fata",name:"Zână",image:""},
+  {id:"f2",gender:"fata",name:"Balerină",image:""},
+  {id:"f3",gender:"fata",name:"Prințesă",image:""},
+  {id:"f4",gender:"fata",name:"Pisica Marie",image:""},
   {id:"b1",gender:"baiat",name:"Model băiat 01",image:""},
   {id:"b2",gender:"baiat",name:"Model băiat 02",image:""},
-  {id:"b3",gender:"baiat",name:"Model băiat 03",image:""}
+  {id:"b3",gender:"baiat",name:"Model băiat 03",image:""},
+  {id:"b4",gender:"baiat",name:"Model băiat 04",image:""}
 ];
 
 const categories = [
@@ -60,20 +80,42 @@ const categories = [
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
   <div class="category-visual category-${c.visual}">
-    ${c.id==="mot"?`<img class="category-real-image" src="hero-mot-small.jpg?v=15" alt="Seturi pentru moț - Alina's Handmade Boutique">`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
+    ${c.id==="mot"?`<img class="category-real-image" src="./hero-mot-small.jpg" alt="Seturi pentru moț - Alina's Handmade Boutique" loading="eager" onerror="this.onerror=null;this.src='./hero-mot-display.svg';">`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
     <span class="category-arrow">↗</span>
   </div>
   <div class="category-card-body"><h3>${c.name}</h3><p>${c.label}</p><span class="category-models">— &nbsp; ${c.hint}</span></div>
 </a>`).join("");
 
+const modal=document.createElement("div");
+modal.className="model-modal";
+modal.innerHTML=`<div class="model-modal-inner"><button class="model-modal-close" type="button" aria-label="Închide">×</button><img id="modelModalImage" alt=""><div id="modelModalTitle" class="model-modal-title"></div></div>`;
+document.body.appendChild(modal);
+modal.querySelector(".model-modal-close").onclick=()=>modal.classList.remove("open");
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove("open")};
+
 let gender="fata", selected=null, invoice="nu", childPhoto="nu", shirts=[];
 const $=id=>document.getElementById(id);
 const money=n=>`£${Number(n).toFixed(2)}`;
 
+function openModelPhoto(model){
+  if(!model.image){
+    alert("Fotografia acestui model nu este încă în catalog. Modelul poate fi selectat, dar fotografia trebuie încărcată în repository înainte să poată fi mărită.");
+    return;
+  }
+  $("modelModalImage").src=model.image;
+  $("modelModalImage").alt=model.name;
+  $("modelModalTitle").textContent=model.name;
+  modal.classList.add("open");
+}
+
 function renderModels(){
   const list=demoModels.filter(m=>m.gender===gender);
-  $("modelGrid").innerHTML=list.map(m=>`<article class="model-card ${selected?.id===m.id?"selected":""}" data-id="${m.id}"><div class="model-photo">${m.image?`<img src="${m.image}" alt="${m.name}">`:`<span>📷<br>Fotografia modelului<br>va fi adăugată din manager</span>`}</div><h3>${m.name}</h3><p>Selectează acest model</p></article>`).join("");
-  document.querySelectorAll(".model-card").forEach(card=>card.onclick=()=>{selected=demoModels.find(m=>m.id===card.dataset.id);$("modelChoice").value=selected.name;renderModels();renderSummary();$("personalizare").scrollIntoView({behavior:"smooth"})});
+  $("modelGrid").innerHTML=list.map(m=>`<article class="model-card ${selected?.id===m.id?"selected":""}" data-id="${m.id}"><div class="model-photo">${m.image?`<img src="${m.image}" alt="${m.name}" title="Apasă pentru fotografie mai mare">`:`<span>📷<br>Fotografia modelului<br>nu este încă în repository</span>`}</div><h3>${m.name}</h3><button class="model-select-btn" type="button">${selected?.id===m.id?"✓ Model ales":"Alege modelul acesta"}</button></article>`).join("");
+  document.querySelectorAll(".model-card").forEach(card=>{
+    const model=demoModels.find(m=>m.id===card.dataset.id);
+    card.querySelector(".model-photo").onclick=e=>{e.stopPropagation();openModelPhoto(model)};
+    card.querySelector(".model-select-btn").onclick=e=>{e.stopPropagation();selected=model;$("modelChoice").value=model.name;renderModels();renderSummary();$("personalizare").scrollIntoView({behavior:"smooth"})};
+  });
 }
 
 document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{gender=btn.dataset.gender;document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");renderModels()});
@@ -93,21 +135,21 @@ function renderShirts(){ $("shirtRows").innerHTML=shirts.map((_,i)=>shirtRow(i))
 $("showShirts").onclick=()=>{$("shirts").hidden=false;if(!shirts.length)shirts.push({type:"copil",size:"Body 0–3 luni",person:"",message:"",qty:1});renderShirts();renderSummary();$("shirts").scrollIntoView({behavior:"smooth"})};
 $("addShirt").onclick=()=>{shirts.push({type:"copil",size:"Body 0–3 luni",person:"",message:"",qty:1});renderShirts()};
 
-["modelChoice","tray","childName","childDate","trayMessage","deliveryName","phone","address","postcode","invoiceEmail"].forEach(id=>$(id).addEventListener("input",renderSummary));
+["modelChoice","tray","childName","childDate","trayMessage","deliveryName","phone","address","postcode","invoiceEmail"].forEach(id=>{const el=$(id);if(el)el.addEventListener("input",renderSummary)});
 document.querySelectorAll(".invoice-choice").forEach(b=>b.onclick=()=>{invoice=b.dataset.invoice;document.querySelectorAll(".invoice-choice").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("invoiceEmailWrap").hidden=invoice!=="da";renderSummary()});
 
 function shirtTotal(){return shirts.reduce((sum,s)=>sum+(Number(s.qty)||0)*(s.type==="copil"?settings.childShirtPrice:settings.adultShirtPrice),0)}
 function total(){const tray=Number($("tray").value||70);return tray+(childPhoto==="da"?settings.childPhotoPrice:0)+shirtTotal()+(shirts.length?settings.shippingWithShirts:settings.shippingSet)}
-function renderSummary(){let tray=Number($("tray").value||70), html=`<div class="summary-block"><b>🎀 Set Moț</b><div class="summary-line"><span>${$("modelChoice").value||"Model nespecificat"}</span><strong>${money(tray)}</strong></div><div>Copil: ${$("childName").value||"—"} · Data: ${$("childDate").value||"—"}</div><div>Mesaj tavă: ${$("trayMessage").value||"—"}</div><div>Fotografie copil: ${childPhoto==="da"?"DA (+£5)":"NU"}</div></div>`;if(shirts.length){html+=`<div class="summary-block"><b>👕 Tricouri tematice</b>`+shirts.map(s=>`<div class="summary-line"><span>${s.qty} × ${s.size} — Pentru: ${s.person||"nespecificat"}${s.message?` — Mesaj: ${s.message}`:""}</span><strong>${money((s.type==="copil"?settings.childShirtPrice:settings.adultShirtPrice)*s.qty)}</strong></div>`).join("")+`</div>`}html+=`<div class="summary-line"><span>Livrare</span><strong>${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}</strong></div>`;$("summary").innerHTML=html;$("total").textContent=`Total: ${money(total())}`}
+function renderSummary(){let tray=Number($("tray").value||70), html=`<div class="summary-block"><b>🎀 Set Moț</b><div class="summary-line"><span>${$("modelChoice").value||"Model nespecificat"}</span><strong>${money(tray)}</strong></div><div>Copil: ${$("childName").value||"—"} · Data (opțional): ${$("childDate").value||"—"}</div><div>Mesaj tavă: ${$("trayMessage").value||"—"}</div><div>Fotografie copil: ${childPhoto==="da"?"DA (+£5)":"NU"}</div></div>`;if(shirts.length){html+=`<div class="summary-block"><b>👕 Tricouri tematice</b>`+shirts.map(s=>`<div class="summary-line"><span>${s.qty} × ${s.size} — Pentru: ${s.person||"nespecificat"}${s.message?` — Mesaj: ${s.message}`:""}</span><strong>${money((s.type==="copil"?settings.childShirtPrice:settings.adultShirtPrice)*s.qty)}</strong></div>`).join("")+`</div>`}html+=`<div class="summary-line"><span>Livrare</span><strong>${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}</strong></div>`;$("summary").innerHTML=html;$("total").textContent=`Total: ${money(total())}`}
 
-function validate(){const req=[["modelChoice","modelul"],["childName","numele copilului"],["deliveryName","numele pentru livrare"],["phone","telefonul"],["address","adresa"],["postcode","postcode-ul"]];for(const [id,label] of req)if(!$(id).value.trim()){alert(`Te rugăm să completezi ${label}.`);$(id).focus();return false}if(invoice==="da"&&!$("invoiceEmail").value.trim()){alert("Te rugăm să introduci emailul pentru factură.");$("invoiceEmail").focus();return false}for(const s of shirts)if(!s.person.trim()){alert("Completează pentru cine este fiecare tricou.");return false}return true}
+function validate(){const req=[["modelChoice","modelul"],["childName","numele copilului"],["deliveryName","numele pentru livrare"],["phone","telefonul"],["address","adresa"],["postcode","postcode-ul"]];for(const [id,label] of req){const el=$(id);if(!el||!el.value.trim()){alert(`Te rugăm să completezi ${label}.`);if(el)el.focus();return false}}if(invoice==="da"&&!$("invoiceEmail").value.trim()){alert("Te rugăm să introduci emailul pentru factură.");$("invoiceEmail").focus();return false}for(const s of shirts)if(!String(s.person||"").trim()){alert("Completează pentru cine este fiecare tricou.");return false}return true}
 
-$("whatsapp").onclick=()=>{if(!validate())return;let lines=["🛍️ COMANDĂ NOUĂ — ALINA'S HANDMADE BOUTIQUE","","🎀 SET PENTRU MOȚ",`Model: ${$("modelChoice").value}`,`Tavă: ${$("tray").value==70?"Dreptunghiulară":"Rotundă"} — ${money($("tray").value)}`,`Nume copil: ${$("childName").value}`,`Data: ${$("childDate").value||"—"}`,`Mesaj tavă: ${$("trayMessage").value||"—"}`,`Fotografie copil: ${childPhoto==="da"?"DA — +£5. Fotografia va fi trimisă după confirmarea comenzii, direct pe WhatsApp.":"NU"}`];if(shirts.length){lines.push("","👕 TRICOURI TEMATICE");shirts.forEach(s=>lines.push(`${s.qty} × ${s.size} — Pentru: ${s.person}`,`Mesaj: ${s.message||"—"}`))}lines.push("",`🚚 Livrare: ${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}`,`💷 TOTAL: ${money(total())}`,"","📦 DATE LIVRARE",`Nume: ${$("deliveryName").value}`,`Adresă: ${$("address").value}`,`Postcode: ${$("postcode").value}`,`Telefon: ${$("phone").value}`,"",`🧾 Factură: ${invoice==="da"?"DA":"NU"}`);if(invoice==="da")lines.push(`Email factură: ${$("invoiceEmail").value}`);window.open(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`,"_blank")};
+const orderButton=$("orderWhatsApp");
+if(orderButton)orderButton.onclick=()=>{if(!validate())return;let lines=["🛍️ COMANDĂ NOUĂ — ALINA'S HANDMADE BOUTIQUE","","🎀 SET PENTRU MOȚ",`Model: ${$("modelChoice").value}`,`Tavă: ${$("tray").value==70?"Dreptunghiulară":"Rotundă"} — ${money($("tray").value)}`,`Nume copil: ${$("childName").value}`,`Data (opțional): ${$("childDate").value||"—"}`,`Mesaj tavă: ${$("trayMessage").value||"—"}`,`Fotografie copil: ${childPhoto==="da"?"DA — +£5. Fotografia se va trimite separat în WhatsApp.":"NU"}`];if(selected)lines.push(`Model selectat: ${selected.name}`);if(shirts.length){lines.push("","👕 TRICOURI TEMATICE");shirts.forEach(s=>lines.push(`${s.qty} × ${s.size} — Pentru: ${s.person}`,`Mesaj: ${s.message||"—"}`))}lines.push("",`🚚 Livrare: ${money(shirts.length?settings.shippingWithShirts:settings.shippingSet)}`,`💷 TOTAL: ${money(total())}`,"","📦 DATE LIVRARE",`Nume: ${$("deliveryName").value}`,`Adresă: ${$("address").value}`,`Postcode: ${$("postcode").value}`,`Telefon: ${$("phone").value}`,"",`🧾 Factură: ${invoice==="da"?"DA":"NU"}`);if(invoice==="da")lines.push(`Email factură: ${$("invoiceEmail").value}`);window.open(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`,"_blank")};
 
 const searchToggle=$("searchToggle"), searchPanel=$("searchPanel"), catalogSearch=$("catalogSearch");
-searchToggle.onclick=()=>{searchPanel.hidden=!searchPanel.hidden;if(!searchPanel.hidden)catalogSearch.focus()};
-catalogSearch.addEventListener("input",()=>{const q=catalogSearch.value.trim().toLowerCase();document.querySelectorAll(".model-card").forEach(card=>{card.hidden=!!q&&!card.textContent.toLowerCase().includes(q)});});
-$("favoritesBtn").onclick=()=>alert("Zona de favorite va fi activată împreună cu managerul produselor.");
-$("cartBtn").onclick=()=>$("cos").scrollIntoView({behavior:"smooth"});
+if(searchToggle&&searchPanel&&catalogSearch){searchToggle.onclick=()=>{searchPanel.hidden=!searchPanel.hidden;if(!searchPanel.hidden)catalogSearch.focus()};catalogSearch.addEventListener("input",()=>{const q=catalogSearch.value.trim().toLowerCase();document.querySelectorAll(".model-card").forEach(card=>{card.hidden=!!q&&!card.textContent.toLowerCase().includes(q)});});}
+const favoritesBtn=$("favoritesBtn");if(favoritesBtn)favoritesBtn.onclick=()=>alert("Zona de favorite va fi activată împreună cu managerul produselor.");
+const cartBtn=$("cartBtn");if(cartBtn)cartBtn.onclick=()=>{const cos=$("cos");if(cos)cos.scrollIntoView({behavior:"smooth"})};
 
 renderModels();renderSummary();
