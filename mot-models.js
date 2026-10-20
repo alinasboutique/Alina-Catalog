@@ -410,6 +410,26 @@
     return getAllProducts(db);
   }
 
+
+  function updateMotCategoryPhoto() {
+    const card = document.querySelector('.category-card[href="#mot"] .category-visual');
+    if (!card) return;
+    const model = products.find(item => productPhotos(item).length && !isBoy(item)) || products.find(item => productPhotos(item).length);
+    if (!model) return;
+    const url = productPhotos(model)[0];
+    if (!url) return;
+    const photo = new Image();
+    photo.onload = () => {
+      card.querySelectorAll('.category-art-main,.category-art-mini').forEach(el => el.remove());
+      card.querySelector('.mot-category-cover')?.remove();
+      photo.className = 'mot-category-cover';
+      photo.alt = 'Set pentru moț personalizat – Alina’s Handmade Boutique';
+      photo.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover;object-position:center';
+      card.insertBefore(photo, card.firstChild);
+    };
+    photo.src = url;
+  }
+
   async function load() {
     const grid = $('modelGrid');
     if (!grid) return;
@@ -423,11 +443,13 @@
       products = await loadFromSupabase();
       if (!products.length) throw new Error('Supabase nu a returnat modele active.');
       renderModels();
+      updateMotCategoryPhoto();
     } catch (supabaseError) {
       console.warn('Supabase mot models:', supabaseError);
       try {
         products = await loadFromIndexedDB();
         renderModels();
+        updateMotCategoryPhoto();
       } catch (localError) {
         console.error('Seturi pentru moț:', localError);
         grid.innerHTML = '<div class="mot-empty">Nu am putut încărca modelele și fotografiile. Reîncarcă pagina.</div>';
