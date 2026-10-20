@@ -305,15 +305,12 @@
       box.className = 'mot-custom-options';
       box.innerHTML = `
         <h3>🎨 Dacă nu găsești tematica dorită</h3>
-        <p>Scrie tema dorită mai sus, apoi alege tipul de tavă și dacă dorești fotografia copilului.</p>
+        <p>Scrie tema dorită mai sus, apoi alege tipul de tavă iar opțiunea pentru fotografia copilului o alegi în secțiunea de mai jos.</p>
         <div class="mot-choice-row">
           <button type="button" class="mot-choice active" data-custom-tray="70">Tavă dreptunghiulară £70</button>
           <button type="button" class="mot-choice" data-custom-tray="80">Tavă rotundă £80</button>
         </div>
-        <div class="mot-custom-photo-row">
-          <button type="button" class="mot-custom-photo active" data-custom-photo="nu">Fără fotografie</button>
-          <button type="button" class="mot-custom-photo" data-custom-photo="da">Adaugă fotografie copil +£5</button>
-        </div>`;
+`;
       form.insertAdjacentElement('afterend', box);
     }
 
@@ -322,15 +319,6 @@
         selectedTray = btn.dataset.customTray;
         if (trayInput) trayInput.value = selectedTray;
         box.querySelectorAll('[data-custom-tray]').forEach(x => x.classList.toggle('active', x === btn));
-        renderSummarySafe();
-      };
-    });
-
-    box.querySelectorAll('[data-custom-photo]').forEach(btn => {
-      btn.onclick = () => {
-        selectedChildPhoto = btn.dataset.customPhoto;
-        document.querySelectorAll('.photo-choice-btn').forEach(x => x.classList.toggle('active', x.dataset.photo === selectedChildPhoto));
-        box.querySelectorAll('[data-custom-photo]').forEach(x => x.classList.toggle('active', x === btn));
         renderSummarySafe();
       };
     });
@@ -346,7 +334,6 @@
     if (photoBox) photoBox.querySelectorAll('.photo-choice-btn').forEach(btn => {
       btn.onclick = () => {
         selectedChildPhoto = btn.dataset.photo === 'da' ? 'da' : 'nu';
-        box.querySelectorAll('[data-custom-photo]').forEach(x => x.classList.toggle('active', x.dataset.customPhoto === selectedChildPhoto));
         photoBox.querySelectorAll('.photo-choice-btn').forEach(x => x.classList.toggle('active', x === btn));
         renderSummarySafe();
       };
