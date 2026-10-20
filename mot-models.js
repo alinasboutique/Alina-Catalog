@@ -1,11 +1,12 @@
-/* Seturi pentru Moț — folosește aceleași produse și fotografii din catalogul vechi.
-   Nu copiem designul vechi; preluăm doar datele/fotografiile din Supabase. */
+/* Seturi pentru Moț — preia produsele și fotografiile deja existente în catalogul vechi.
+   Nu schimbăm designul catalogului actual; folosim doar datele/fotografiile existente. */
 (() => {
   const SB_URL = 'https://zbfqhmiqjcvicqlidswo.supabase.co';
   const SB_KEY = 'sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
   const API = SB_URL + '/rest/v1';
   const HEADERS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
-  const BUCKET = 'catalog';
+  // IMPORTANT: fotografiile seturilor de moț din catalogul vechi sunt în acest bucket.
+  const BUCKET = 'mot-models';
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]));
   const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -21,7 +22,10 @@
     if (!value) return '';
     const raw = String(value).trim();
     if (/^https?:\/\//i.test(raw) || /^data:/i.test(raw)) return raw;
-    const clean = raw.replace(/^\/+/, '').replace(/^storage\/v1\/object\/public\//, '').replace(/^catalog\//, '');
+    let clean = raw.replace(/^\/+/, '');
+    clean = clean.replace(/^storage\/v1\/object\/public\/[^/]+\//i, '');
+    clean = clean.replace(/^mot-models\//i, '');
+    clean = clean.replace(/^catalog\//i, '');
     return `${SB_URL}/storage/v1/object/public/${BUCKET}/${clean}`;
   }
 
@@ -45,9 +49,9 @@
     const list = photos
       .filter(p => String(p.product_id) === String(product.id))
       .sort((a,b) => (Number(a.display_order||0) - Number(b.display_order||0)));
-    const urls = list.map(p => p.image_url || p.url || p.path || p.file_path).filter(Boolean).map(photoUrl);
+    const urls = list.map(p => p.image_url || p.url || p.path || p.file_path || p.photo_url).filter(Boolean).map(photoUrl);
     if (!urls.length) return `<div class="mot-no-photo">Fotografia modelului nu este disponibilă.</div>`;
-    return `<div class="mot-gallery">${urls.slice(0, 12).map((u,i) => `<button type="button" class="mot-photo" data-full="${esc(u)}" aria-label="Vezi fotografia ${i+1}"><img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy"></button>`).join('')}</div>`;
+    return `<div class="mot-gallery">${urls.slice(0, 12).map((u,i) => `<button type="button" class="mot-photo" data-full="${esc(u)}" aria-label="Vezi fotografia ${i+1}"><img src="${esc(u)}" alt="${esc(product.name || 'Model set moț')}" loading="lazy" onerror="this.closest('.mot-photo').classList.add('mot-image-error');this.style.display='none'"></button>`).join('')}</div>`;
   }
 
   function render() {
@@ -77,7 +81,7 @@
 
     grid.querySelectorAll('.mot-photo').forEach(btn => btn.onclick = e => {
       e.stopPropagation();
-      openLightbox(btn.dataset.full);
+      if (btn.dataset.full) openLightbox(btn.dataset.full);
     });
   }
 
@@ -116,6 +120,7 @@
     .mot-photo:first-child{grid-column:span 2;grid-row:span 2}
     .mot-photo img{display:block;width:100%;aspect-ratio:1;object-fit:cover;transition:transform .2s ease}
     .mot-photo:hover img{transform:scale(1.035)}
+    .mot-photo.mot-image-error{background:#f3e5e1;min-height:80px}
     .mot-model-info{padding:5px 3px 3px}.mot-model-info h3{font:500 22px/1.2 Georgia,serif!important;color:#68434a!important;margin:10px 0 5px!important}
     .mot-price{font-weight:800;color:#7b3f4b;margin:0 0 8px}.mot-description{font-size:12px;line-height:1.5;color:#806f70;margin:0 0 10px}
     .mot-select{width:100%;border:1px solid #c98a98;border-radius:10px;background:#fff;color:#7b3f4b;padding:10px;font-weight:800;cursor:pointer}
