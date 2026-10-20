@@ -162,7 +162,7 @@
         <img class="mot-lightbox-image" alt="Fotografie model">
         <h3 class="mot-lightbox-title"></h3>
         <div class="mot-lightbox-thumbs"></div>
-        <button type="button" class="mot-lightbox-select">Alege această fotografie</button>
+        <button type="button" class="mot-lightbox-select">Alege modelul acesta</button>
       </div>`;
     document.body.appendChild(box);
 
@@ -241,7 +241,7 @@
           <h3>${esc(model.name || 'Model set moț')}</h3>
           <p class="mot-description">${esc(model.description || 'Personalizează cu nume, fotografie copil, data și mesaj pentru tăviță.')}</p>
           <p class="mot-price">Tavă dreptunghiulară £70 · Tavă rotundă £80</p>
-          <button type="button" class="mot-select">${selected ? '✓ Model ales' : 'Alege modelul acesta'}</button>
+          <button type="button" class="mot-select">${selected ? '✓ Model ales' : 'Răsfoiește pozele'}</button>
         </div>
       </article>`;
     }).join('');
@@ -251,7 +251,7 @@
         e.preventDefault();
         e.stopPropagation();
         const model = list[Number(button.closest('[data-index]').dataset.index)];
-        selectModel(model, selectedPhotoUrl && selectedModel === model ? selectedPhotoUrl : '');
+        openLightbox(model, productPhotos(model), 0);
       });
     });
 
