@@ -112,6 +112,9 @@
       .mot-select{width:100%;border:2px solid #7b3f4b;border-radius:11px;background:#7b3f4b;color:#fff;padding:14px 12px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 5px 14px rgba(123,63,75,.22);transition:background .18s,transform .18s,box-shadow .18s}.mot-select:hover{background:#65323e;transform:translateY(-2px);box-shadow:0 8px 18px rgba(123,63,75,.28)}.mot-select:focus-visible{outline:3px solid #d99ba7;outline-offset:3px}
       .mot-selected{border-color:#c4778b;box-shadow:0 10px 28px rgba(123,63,75,.14)}
       .mot-selected .mot-select{background:#c4778b;border-color:#c4778b;color:#fff}
+      #modelGrid .mot-model-card .mot-select{display:block!important;width:100%!important;min-height:50px!important;background:#7b3f4b!important;color:#fff!important;border:2px solid #7b3f4b!important;border-radius:11px!important;font-size:15px!important;font-weight:800!important;box-shadow:0 5px 14px rgba(123,63,75,.22)!important}
+      #modelGrid .mot-model-card .mot-select:hover{background:#65323e!important}
+      #modelGrid .mot-model-card.mot-selected .mot-select{background:#c4778b!important;border-color:#c4778b!important}
       .mot-empty,.mot-no-photo{padding:30px;text-align:center;color:#806f70;background:#f8eee9;border-radius:13px}
       .mot-lightbox{position:fixed;inset:0;background:rgba(55,35,39,.82);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
       .mot-lightbox.open{display:flex}
