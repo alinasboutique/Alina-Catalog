@@ -18,7 +18,9 @@ categoryStyle.textContent=`
 .category-art-mini{position:absolute;z-index:1;width:78px;height:96px;border-radius:11px;background:linear-gradient(145deg,#fff,#f3dfd8);border:1px solid rgba(216,194,180,.75);box-shadow:0 7px 17px rgba(95,55,60,.10)}
 .category-art-mini::after{content:"";position:absolute;left:13px;right:13px;top:14px;height:5px;border-radius:4px;background:rgba(123,63,75,.13);box-shadow:0 12px 0 rgba(123,63,75,.08),0 24px 0 rgba(123,63,75,.06)}
 .mini-one{left:17%;top:27px;transform:rotate(-9deg)}.mini-two{right:15%;top:31px;transform:rotate(8deg)}.mini-three{right:25%;bottom:17px;transform:rotate(3deg);opacity:.78}
-.category-mot .category-art-main{background:linear-gradient(145deg,#fff5f4,#f7dfe2)}
+.category-mot .category-art-main,.category-mot .category-art-mini,.category-mot .category-arrow{display:none!important}
+.category-mot{background:#f8eee9!important}
+.category-real-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;display:block!important;z-index:2!important}
 .category-botez .category-art-main{background:linear-gradient(145deg,#fff,#eee9f5)}
 .category-nunta .category-art-main{background:linear-gradient(145deg,#fff,#f4e7df)}
 .category-toppers .category-art-main{background:linear-gradient(145deg,#fff,#f9e3dc)}
@@ -58,6 +60,7 @@ const categories = [
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
   <div class="category-visual category-${c.visual}">
+    ${c.id==="mot"?`<img class="category-real-image" src="hero-mot-small.jpg?v=3" alt="Seturi pentru moț - Alina's Handmade Boutique">`:``}
     <div class="category-art-main">${c.icon}</div>
     <div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>
     <span class="category-arrow">↗</span>
