@@ -120,7 +120,7 @@
       .mot-lightbox.open{display:flex}
       .mot-lightbox-inner{position:relative;box-sizing:border-box;width:min(1100px,94vw);max-height:94dvh;min-height:0;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;background:#fffaf7;border-radius:16px;padding:14px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
       .mot-lightbox-image{display:block;box-sizing:border-box;width:100%;height:auto;max-width:100%;max-height:calc(94dvh - 190px);min-height:0;flex:1 1 auto;object-fit:contain;border-radius:10px;margin:0 auto}
-      .mot-lightbox-title{font:500 20px Georgia,serif;color:#68434a;margin:9px 50px 8px}
+      .mot-lightbox-photo-wrap{display:flex;align-items:center;justify-content:center;gap:8px;min-height:0;flex:1 1 auto;width:100%}.mot-lightbox-photo-wrap .mot-lightbox-image{flex:1 1 auto;min-width:0}.mot-gallery-prev,.mot-gallery-next{flex:0 0 44px;width:44px;height:54px;border:0;border-radius:12px;background:#7b3f4b;color:white;font-size:34px;cursor:pointer}.mot-gallery-prev:disabled,.mot-gallery-next:disabled{opacity:.35;cursor:default}.mot-gallery-count{font-size:14px;color:#68434a;padding-top:5px}.mot-lightbox-title{font:500 20px Georgia,serif;color:#68434a;margin:9px 50px 8px}
       .mot-lightbox-thumbs{display:flex;flex:0 0 auto;min-width:0;max-width:100%;gap:7px;overflow-x:auto;overflow-y:hidden;padding:3px;justify-content:flex-start}
       .mot-lightbox-thumbs button{border:2px solid transparent;background:#fff;padding:2px;border-radius:8px;cursor:pointer;flex:0 0 66px}
       .mot-lightbox-thumbs button.active{border-color:#c4778b}
@@ -159,7 +159,7 @@
     box.innerHTML = `
       <div class="mot-lightbox-inner">
         <button type="button" class="mot-lightbox-close" aria-label="Închide">×</button>
-        <img class="mot-lightbox-image" alt="Fotografie model">
+        <div class="mot-lightbox-photo-wrap"><button type="button" class="mot-gallery-prev" aria-label="Fotografia anterioară">‹</button><img class="mot-lightbox-image" alt="Fotografie model"><button type="button" class="mot-gallery-next" aria-label="Fotografia următoare">›</button></div><div class="mot-gallery-count" aria-live="polite"></div>
         <h3 class="mot-lightbox-title"></h3>
         <div class="mot-lightbox-thumbs"></div>
         <button type="button" class="mot-lightbox-select">Alege modelul acesta</button>
@@ -191,14 +191,14 @@
     box.querySelector('.mot-lightbox-title').textContent = model.name || 'Model set moț';
 
     const main = box.querySelector('.mot-lightbox-image');
-    const thumbs = box.querySelector('.mot-lightbox-thumbs');
+    const thumbs = box.querySelector('.mot-lightbox-thumbs');const prev=box.querySelector('.mot-gallery-prev');const next=box.querySelector('.mot-gallery-next');const count=box.querySelector('.mot-gallery-count');
 
     const showPhoto = i => {
       if (!photos[i]) return;
       box.dataset.photoIndex = String(i);
       main.src = photos[i];
       main.alt = model.name || 'Model set moț';
-      thumbs.querySelectorAll('button').forEach((b,n) => b.classList.toggle('active', n === i));
+      thumbs.querySelectorAll('button').forEach((b,n) => b.classList.toggle('active', n === i));count.textContent=(i+1)+' / '+photos.length;prev.disabled=next.disabled=photos.length<2;
     };
 
     thumbs.innerHTML = photos.map((url,i) => `<button type="button" aria-label="Fotografia ${i + 1}"><img src="${esc(url)}" alt=""></button>`).join('');
@@ -208,7 +208,7 @@
       showPhoto(i);
     }));
 
-    showPhoto(Math.min(index, photos.length - 1));
+    prev.onclick=()=>showPhoto((Number(box.dataset.photoIndex)-1+photos.length)%photos.length);next.onclick=()=>showPhoto((Number(box.dataset.photoIndex)+1)%photos.length);showPhoto(Math.min(index, photos.length - 1));
     box.classList.add('open');
   }
 
