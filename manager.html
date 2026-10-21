@@ -29,7 +29,7 @@ if(!id && files.length){
   const uploaded=await db.storage.from('catalog-images').upload(path,file,{contentType:file.type,upsert:false});
   if(uploaded.error)throw uploaded.error;
   const image_url=db.storage.from('catalog-images').getPublicUrl(path).data.publicUrl;
-  const data={...payload,name:files.length===1?payload.name:payload.name+' - Model '+String(completed+1).padStart(2,'0'),display_order:payload.display_order+completed};
+  const data={...payload,name:files.length===1?payload.name:(/^Model\\s*\\d+$/i.test(payload.name)?'Model '+String(Number(payload.name.match(/\\d+/)[0])+completed).padStart(2,'0'):payload.name+' '+String(completed+1).padStart(2,'0')),display_order:payload.display_order+completed};
   const created=await db.from('catalog_products').insert(data).select('id').single();
   if(created.error)throw created.error;
   const photo=await db.from('catalog_product_photos').insert({product_id:created.data.id,image_url,is_main:true,display_order:0});
