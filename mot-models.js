@@ -188,7 +188,7 @@
     const box = ensureLightbox();
     box._model = model;
     box.dataset.photoIndex = String(index);
-    box.querySelector('.mot-lightbox-title').textContent = model.name || 'Model set moț';
+    
 
     const main = box.querySelector('.mot-lightbox-image');
     const thumbs = box.querySelector('.mot-lightbox-thumbs');const prev=box.querySelector('.mot-gallery-prev');const next=box.querySelector('.mot-gallery-next');const count=box.querySelector('.mot-gallery-count');
