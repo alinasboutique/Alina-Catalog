@@ -1,3 +1,5 @@
+/* Homepage: remove obsolete dynamically generated duplicate category links. */
+(function(){const clean=()=>{document.getElementById('additional-categories')?.remove()};clean();document.addEventListener('DOMContentLoaded',clean);window.addEventListener('load',clean);const observer=new MutationObserver(clean);observer.observe(document.documentElement,{childList:true,subtree:true})})();
 const settings = { childShirtPrice: 10, adultShirtPrice: 13, rectangularTray: 70, roundTray: 80, childPhotoPrice: 5, shippingSet: 5.95, shippingWithShirts: 8.95, whatsapp: "447742444493" };
 
 const categoryStyle=document.createElement("style");
