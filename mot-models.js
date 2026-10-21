@@ -160,7 +160,7 @@
       <div class="mot-lightbox-inner">
         <button type="button" class="mot-lightbox-close" aria-label="Închide">×</button>
         <div class="mot-lightbox-photo-wrap"><button type="button" class="mot-gallery-prev" aria-label="Fotografia anterioară">‹</button><img class="mot-lightbox-image" alt="Fotografie model"><button type="button" class="mot-gallery-next" aria-label="Fotografia următoare">›</button></div><div class="mot-gallery-count" aria-live="polite"></div>
-        <h3 class="mot-lightbox-title"></h3>
+        
         <div class="mot-lightbox-thumbs"></div>
         <button type="button" class="mot-lightbox-select">Alege modelul acesta</button>
       </div>`;
