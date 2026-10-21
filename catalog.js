@@ -69,13 +69,15 @@ const demoModels = [
 
 const categories = [
   {id:"mot",icon:"🎀",name:"Seturi pentru moț",label:"Fetiță • Băiat",visual:"set",hint:"Mai multe modele"},
-  {id:"botez",icon:"🕊️",name:"Botez",label:"Invitații • Mărturii • Cadouri",visual:"botez",hint:"Mai multe modele"},
-  {id:"nunta",icon:"💍",name:"Nuntă",label:"Papetărie • Mărturii • Accesorii",visual:"nunta",hint:"Mai multe modele"},
+  {id:"tricouri",icon:"👕",name:"Tricouri personalizate",label:"Adulți • Body și tricouri copii • Seturi tutu aniversare",visual:"tricouri",hint:"Mai multe modele"},
+  {id:"ecusoane",icon:"🏅",name:"Ecusoane personalizate",label:"Modele • Tematici • Personalizare",visual:"ecusoane",hint:"Mai multe modele"},
   {id:"toppers",icon:"🎂",name:"Cake Toppers",label:"Aniversări • Evenimente",visual:"toppers",hint:"Mai multe modele"},
-  {id:"tricouri",icon:"👕",name:"Tricouri personalizate",label:"Copii • Damă • Bărbat",visual:"tricouri",hint:"Mai multe modele"},
-  {id:"ecusoane",icon:"🏅",name:"Ecusoane",label:"Modele • Tematici • Personalizare",visual:"ecusoane",hint:"Mai multe modele"},
-  {id:"cadouri",icon:"🎁",name:"Cadouri personalizate",label:"Pentru orice ocazie",visual:"cadouri",hint:"Mai multe modele"}
-];
+  {id:"nunta",icon:"💍",name:"Nuntă",label:"Papetărie • Mărturii • Accesorii",visual:"nunta",hint:"Mai multe modele"},
+  {id:"botez",icon:"🕊️",name:"Botez",label:"Invitații • Mărturii • Cadouri",visual:"botez",hint:"Mai multe modele"},
+  {id:"cadouri",icon:"🎁",name:"Cadouri personalizate",label:"Cadouri pentru profesori • Alte ocazii",visual:"cadouri",hint:"Mai multe modele"},
+  {id:"craciun",icon:"🎄",name:"Crăciun",label:"Cadouri și decorațiuni de Crăciun",visual:"craciun",hint:"Mai multe modele"},
+  {id:"martisor",icon:"🌸",name:"Mărțișor",label:"Mărțișoare personalizate",visual:"martisor",hint:"Mai multe modele"}
+]
 
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
