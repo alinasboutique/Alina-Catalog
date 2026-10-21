@@ -82,7 +82,7 @@ const categories = [
 ]
 
 const categoryGrid=document.getElementById("category-grid");
-if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}">
+if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="${c.id==='tricouri'?'#catalog/7f77756b-5d8f-4915-bf9d-b444026e69ac':'#'+c.id}">
   <div class="category-visual category-${c.visual}">
     ${c.id==="mot"?`<div class="category-art-main">🎀</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
     <span class="category-arrow">↗</span>
