@@ -151,7 +151,7 @@
 
   function ensureLightbox() {
     let box = $('motLightbox');
-    if (box) return box;
+    if (box) { box.querySelectorAll('.mot-lightbox-title').forEach(el=>el.remove()); return box; }
 
     box = document.createElement('div');
     box.id = 'motLightbox';
@@ -186,6 +186,7 @@
   function openLightbox(model, photos, index = 0) {
     if (!photos.length) return;
     const box = ensureLightbox();
+    box.querySelectorAll('.mot-lightbox-title').forEach(el=>el.remove());
     box._model = model;
     box.dataset.photoIndex = String(index);
     
