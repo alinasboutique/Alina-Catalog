@@ -29,7 +29,7 @@ if(isAdultShirt){
   }
  }
  qty.addEventListener('input',renderShirtRows);
- renderShirtRows();
+ queueMicrotask(renderShirtRows);
 }
 const total=document.createElement('p');total.style.fontWeight='700';form.append(total);const error=document.createElement('p');error.className='error';form.append(error);const submit=document.createElement('button');submit.type='submit';submit.textContent='Continuă finalizarea comenzii';form.append(submit);
 const delivery=document.createElement('form');delivery.hidden=true;const heading=document.createElement('h3');heading.textContent='Date pentru livrare';delivery.append(heading);
