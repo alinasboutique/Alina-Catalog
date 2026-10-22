@@ -121,7 +121,7 @@ function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\
 function node(tag,cls,content){const x=document.createElement(tag);if(cls)x.className=cls;if(content!=null)x.textContent=content;return x}
 function matchesBotez(c,page){const n=norm(c.name);return (page==='invitatii'&&n.includes('invitati')&&n.includes('botez'))||c.slug===page||n===page||n.startsWith(page+'-')}
 function drawProducts(where,items){where.replaceChildren();if(!items.length){where.append(node('p','','Nu sunt încă produse disponibile în această categorie.'));return}for(const p of items){const card=node('article','catalog-dynamic-card'),pic=photos.find(x=>x.product_id===p.id&&x.is_main)||photos.find(x=>x.product_id===p.id);card.dataset.categoryId=p.category_id;card.dataset.gallery=JSON.stringify(photos.filter(x=>x.product_id===p.id).sort((a,b)=>(Number(b.is_main)-Number(a.is_main))||(Number(a.display_order)-Number(b.display_order))).map(x=>x.image_url));if(pic){const img=node('img');img.src=pic.image_url;img.alt=p.name;img.loading='lazy';card.append(img)}const details=node('div','details'),unit=Number(p.price||0),minimum=Math.max(1,Number(p.min_quantity)||20);const isMot=cats.some(c=>c.id===p.category_id&&['seturi-mot-baiat','seturi-mot-fetita'].includes(c.slug));details.append(node('h3','',p.name),node('strong','',isMot?'De la £70 / set':'£'+unit.toFixed(2)+' / bucată'),node('p','',isMot?'Personalizează tipul tăvii și fotografia copilului':'Comandă minimă: '+minimum+' bucăți'));if(p.description)details.append(node('p','',p.description));
-if(cats.some(c=>c.id===p.category_id&&c.slug==='tricouri-aniversare')){
+if(p.category_id==='18d494d2-fc71-4589-a759-bae162309e0d'){
  const qtyLabel=node('label','','Număr de produse');const qty=node('input');qty.type='number';qty.min='1';qty.max='100';qty.value='1';qtyLabel.append(qty);
  const rows=node('div'),total=node('p'),send=node('a','','Comandă personalizată pe WhatsApp →');send.target='_blank';send.rel='noopener';
  const field=(title,element)=>{const l=node('label','',title);l.style.cssText='display:block;margin:8px 0';element.style.cssText='display:block;width:100%;padding:8px;margin-top:5px';l.append(element);return l};
@@ -164,7 +164,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#catalo
 <script src="catalog.js?v=24"></script>
 <script src="mot-models.js?v=20"></script>
 <script src="mot-navigation.js?v=5"></script>
-<script src="product-checkout-shirts-v9.js?v=20261022-inline-shirt-form"></script>
+<script src="product-checkout-shirts-v9.js?v=20261022-clean-order-panel"></script>
 <script src="custom-site-buttons.js?v=2"></script>
 </body>
 </html>
