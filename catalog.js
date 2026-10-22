@@ -90,20 +90,35 @@ if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-ca
   <div class="category-card-body"><h3>${c.name}</h3><p>${c.label}</p><span class="category-models">— &nbsp; ${c.hint}</span></div>
 </a>`).join("");
 
-/* Coperți duble din fotografiile reale deja salvate; nu modifică produsele. */
-const coverCss=document.createElement('style');coverCss.textContent='.category-cover-pair{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:3px;z-index:2}.category-cover-pair img{width:100%;height:100%;object-fit:cover;min-width:0}.category-cover-pair img:first-child{object-position:center}.category-cover-pair img:last-child{object-position:center}.category-cover-pair:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(60,30,35,.12),transparent 60%)}';document.head.append(coverCss);
+/* O singură copertă reală pentru fiecare categorie principală. */
 (async function loadCategoryCovers(){
- const root='https://zbfqhmiqjcvicqlidswo.supabase.co';const key='sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';const headers={apikey:key,Authorization:'Bearer '+key};
+ const root='https://zbfqhmiqjcvicqlidswo.supabase.co';
+ const key='sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
+ const headers={apikey:key,Authorization:'Bearer '+key};
  async function get(table,query){const r=await fetch(root+'/rest/v1/'+table+'?'+query,{headers});if(!r.ok)throw Error('cover fetch '+table);return r.json()}
  try{
- const [cats,products,photos,mot,motPhotos]=await Promise.all([get('catalog_categories','select=id,slug,image_url,parent_id'),get('catalog_products','select=id,category_id,is_active&is_active=eq.true'),get('catalog_product_photos','select=product_id,image_url,is_main,display_order&order=display_order.asc'),get('mot_models','select=id,category,is_active&is_active=eq.true'),get('mot_model_photos','select=model_id,image_url,display_order&order=display_order.asc')]);
- const categorySlugs={mot:'seturi-mot',tricouri:'tricouri-personalizate',ecusoane:'ecusoane',toppers:'toppers',nunta:'nunta',botez:'botez',cadouri:'cadouri',craciun:'craciun',martisor:'martisor'};
- for(const [cardId,slug] of Object.entries(categorySlugs)){const category=cats.find(c=>c.slug===slug&&c.image_url);if(!category)continue;const card=document.querySelector('.category-card[href="#'+cardId+'"]')||(cardId==='tricouri'?document.querySelector('.category-card[href^="#catalog/7f77756b"]'):null);const visual=card?.querySelector('.category-visual');if(!visual)continue;const image=document.createElement('img');image.src=category.image_url;image.alt='Fotografie '+cardId;image.className='saved-category-cover';image.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:4';visual.append(image)}
- const slugById=new Map(cats.map(c=>[c.id,c.slug]));const grouped={};for(const p of products){const slug=slugById.get(p.category_id);if(!slug)continue;const photo=photos.find(x=>x.product_id===p.id&&x.is_main)||photos.find(x=>x.product_id===p.id);if(photo?.image_url)(grouped[slug]??=[]).push(photo.image_url)}
- const motFor=(gender)=>{const m=mot.find(x=>String(x.category||'').toLowerCase().includes(gender));const ph=motPhotos.find(x=>x.model_id===m?.id);return ph?.image_url?(ph.image_url.startsWith('http')?ph.image_url:root+'/storage/v1/object/public/mot-models/'+ph.image_url):null};
- const first=(...slugs)=>slugs.flatMap(slug=>grouped[slug]||[])[0];
- const covers={mot:[motFor('fetit'),motFor('baiat')],botez:[first('invitatii-botez-fetita','invitatii-botez-baiat'),first('marturii')],cadouri:[first('cadouri-pentru-nasi'),(grouped['cadouri-pentru-nasi']||[])[1]],tricouri:[first('tricouri-pentru-adulti'),first('body-uri-si-tricouri-pentru-copii')]};
- for(const [id,urls] of Object.entries(covers)){if(!urls[0]||!urls[1])continue;const visual=document.querySelector('.category-card[href="#'+id+'"] .category-visual');if(!visual)continue;const pair=document.createElement('div');pair.className='category-cover-pair';for(const url of urls){const img=document.createElement('img');img.src=url;img.alt='Exemplu produs real';pair.append(img)}visual.append(pair)}
+  const [cats,mot,motPhotos]=await Promise.all([
+   get('catalog_categories','select=id,slug,image_url,parent_id'),
+   get('mot_models','select=id,category,is_active&is_active=eq.true'),
+   get('mot_model_photos','select=model_id,image_url,display_order&order=display_order.asc')
+  ]);
+  const categorySlugs={tricouri:'tricouri-personalizate',ecusoane:'ecusoane-personalizate',toppers:'cake-toppers',nunta:'nunta',botez:'botez',cadouri:'cadouri-personalizate',craciun:'craciun',martisor:'martisor'};
+  for(const [cardId,slug] of Object.entries(categorySlugs)){
+   const category=cats.find(c=>c.slug===slug&&c.image_url);
+   if(!category)continue;
+   const card=document.querySelector('.category-card[href="#'+cardId+'"]')||document.querySelector('.category-card[href="#catalog/'+category.id+'"]');
+   const visual=card?.querySelector('.category-visual');
+   if(!visual)continue;
+   const image=document.createElement('img');
+   image.src=category.image_url;image.alt='Fotografie '+cardId;
+   image.className='category-real-image';visual.append(image);
+  }
+  const model=mot.find(x=>x.is_active!==false);
+  const photo=motPhotos.find(x=>x.model_id===model?.id&&x.image_url);
+  if(photo){
+   const visual=document.querySelector('.category-card[href="#mot"] .category-visual');
+   if(visual){const image=document.createElement('img');image.src=photo.image_url.startsWith('http')?photo.image_url:root+'/storage/v1/object/public/mot-models/'+photo.image_url;image.alt='Set pentru moț';image.className='category-real-image';visual.append(image)}
+  }
  }catch(e){console.warn('Coperțile reale nu au putut fi încărcate',e)}
 })();
 
