@@ -136,7 +136,7 @@ if(cats.some(c=>c.id===p.category_id&&c.slug==='tricouri-aniversare')){
  const heading=node('h2','','Personalizare tricouri – '+p.name);heading.style.margin='0';
  const close=node('button','','✕ Închide');close.type='button';close.style.cssText='padding:10px 15px;border:1px solid #d7bfc3;border-radius:8px;background:white;color:#68434a;cursor:pointer';
  const description=node('p','','Adulți (14+ ani): £13 • Copii până la 13 ani: £10 • Body: £10');
- rows.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:16px;margin-top:16px';
+ rows.style.cssText='display:flex;flex-direction:column;gap:16px;margin-top:16px;width:100%';
  qty.style.cssText='display:block;width:140px;padding:10px;margin-top:8px;border:1px solid #d7bfc3;border-radius:8px';
  total.style.cssText='font-size:19px;font-weight:700;margin-top:20px';
  send.style.cssText='display:inline-block;padding:14px 20px;background:#7b3f4b;color:white;border-radius:9px;text-decoration:none;font-weight:700';
