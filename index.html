@@ -205,6 +205,25 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#catalo
 <script src="product-checkout-shirts-v9.js?v=20261023-cufar-actual-album"></script>
 <script src="custom-site-buttons.js?v=2"></script>
 
+<style id="single-tray-selector-fix">
+/* The tray is already selected in #tray; hide only the duplicated shortcut choices. */
+#mot .custom-theme-tray-options,#mot .theme-tray-choices,#mot .tray-shortcuts{display:none!important}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const tray=document.getElementById('tray');
+ if(!tray)return;
+ const section=[...document.querySelectorAll('#mot h3,#mot h2')].find(el=>/Dacă nu găsești tematica dorită/i.test(el.textContent||''));
+ if(!section)return;
+ const panel=section.closest('.custom-box,.custom-theme-box,.photo-option,.form-section,.theme-box')||section.parentElement;
+ if(!panel)return;
+ const buttons=[...panel.querySelectorAll('button')].filter(b=>/Tavă (dreptunghiulară|rotundă)/i.test(b.textContent||''));
+ if(buttons.length!==2)return;
+ const wrapper=buttons[0].parentElement;
+ if(wrapper&&buttons.every(b=>b.parentElement===wrapper))wrapper.remove();
+ else buttons.forEach(b=>b.remove());
+});
+</script>
 <style id="mobile-catalog-optimizations">
 @media (max-width: 767px) {
   html,body{max-width:100%;overflow-x:clip}
