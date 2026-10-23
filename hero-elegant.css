@@ -43,3 +43,8 @@ body main#top>section.hero .hero-art-circle-one{width:130px;height:130px;backgro
 body main#top>section.hero .hero-art-circle-two{width:110px;height:110px;background:#b37d83;bottom:3px;right:0}
 body main#top>section.hero .hero-art-caption{position:absolute;bottom:0;left:13%;font:700 9px/1.4 Arial,sans-serif;letter-spacing:2.2px;color:#80575b}
 @media(max-width:700px){body main#top>section.hero{display:flex!important;flex-direction:column!important;gap:26px!important;padding:40px 24px 34px!important;min-height:0!important}body main#top>section.hero h1{font-size:clamp(39px,9.5vw,54px)!important}body main#top>section.hero .hero-art{height:260px!important;max-width:350px!important;margin:0 auto!important}body main#top>section.hero .hero-art-monogram{font-size:110px!important}body main#top>section.hero .hero-art-script{font-size:29px!important}}
+
+/* Display the owner's actual uploaded photograph in the hero instead of monogram. */
+body main#top>section.hero .hero-art-arch.hero-art-photo{background:#e7d9d1!important;overflow:hidden!important;border:9px solid #fffaf6!important}
+body main#top>section.hero .hero-art-arch.hero-art-photo::before{display:none!important;content:none!important}
+body main#top>section.hero .hero-art-photo img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 38%!important}
