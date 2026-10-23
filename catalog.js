@@ -102,7 +102,7 @@ if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-ca
    get('mot_models','select=id,category,is_active&is_active=eq.true'),
    get('mot_model_photos','select=model_id,image_url,display_order&order=display_order.asc')
   ]);
-  const categorySlugs={tricouri:'tricouri-personalizate',ecusoane:'ecusoane-personalizate',toppers:'cake-toppers',nunta:'nunta',botez:'botez',cadouri:'cadouri-personalizate',craciun:'craciun',martisor:'martisor'};
+  const categorySlugs={tricouri:'tricouri-personalizate',ecusoane:'ecusoane',toppers:'cake-toppers',nunta:'nunta',botez:'botez',cadouri:'cadouri-personalizate',craciun:'craciun',martisor:'martisor'};
   for(const [cardId,slug] of Object.entries(categorySlugs)){
    const category=cats.find(c=>c.slug===slug&&c.image_url);
    if(!category)continue;
