@@ -170,7 +170,7 @@ for(const section of botez.querySelectorAll('[data-botez-page]')){const page=sec
 
 let refreshing=false,lastRefresh=0;
 async function refreshPublicCatalog(){
- if(refreshing||document.hidden||document.querySelector('.product-modal-backdrop'))return;
+ if(refreshing||document.hidden||document.querySelector('.product-modal-backdrop')||document.activeElement?.closest('form'))return;
  refreshing=true;
  try{
   const [c,p,f]=await Promise.all([
@@ -182,7 +182,7 @@ async function refreshPublicCatalog(){
   const newCats=c.data||[],newProducts=p.data||[],newPhotos=f.data||[];
   const changed=JSON.stringify([cats,products,photos])!==JSON.stringify([newCats,newProducts,newPhotos]);
   cats=newCats;products=newProducts;photos=newPhotos;lastRefresh=Date.now();
-  if(changed&&!document.querySelector('.product-modal-backdrop')&&!document.activeElement?.closest('form'))render();
+  if(changed&&!document.querySelector('.product-modal-backdrop'))render();
  }catch(e){console.error('Catalog refresh error',e)}
  finally{refreshing=false}
 }
