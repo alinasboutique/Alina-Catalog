@@ -82,7 +82,7 @@ const categories = [
 ]
 
 const categoryGrid=document.getElementById("category-grid");
-if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="${c.id==='tricouri'?'#catalog/7f77756b-5d8f-4915-bf9d-b444026e69ac':c.id==='nunta'?'#catalog/be825367-1b5c-42d4-86de-5c93a5d33a60':c.id==='ecusoane'?'#catalog/25ae881b-6a72-4845-922e-bc3450a2b688':'#'+c.id}">
+if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="${c.id==='tricouri'?'#catalog/7f77756b-5d8f-4915-bf9d-b444026e69ac':c.id==='nunta'?'#catalog/be825367-1b5c-42d4-86de-5c93a5d33a60':c.id==='ecusoane'?'#catalog/25ae881b-6a72-4845-922e-bc3450a2b688':c.id==='toppers'?'#catalog/c52386e7-187f-4c34-9e96-8d10d16694a5':'#'+c.id}">
   <div class="category-visual category-${c.visual}">
     ${c.id==="ecusoane"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/27390188-d5d9-4668-aea6-e720f443f3a2.jpg" alt="Ecusoane personalizate" loading="eager">`:""}
     ${c.id==="mot"?`<div class="category-art-main">🎀</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
