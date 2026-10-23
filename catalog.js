@@ -83,8 +83,9 @@ const categories = [
 ]
 
 const categoryGrid=document.getElementById("category-grid");
-if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="${c.id==='tricouri'?'#catalog/7f77756b-5d8f-4915-bf9d-b444026e69ac':c.id==='nunta'?'#catalog/be825367-1b5c-42d4-86de-5c93a5d33a60':c.id==='ecusoane'?'#catalog/25ae881b-6a72-4845-922e-bc3450a2b688':c.id==='toppers'?'#catalog/c52386e7-187f-4c34-9e96-8d10d16694a5':c.id==='craciun'?'#catalog/eba7bf2c-1407-45b4-99d4-29293b725690':'#'+c.id}">
+if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="${c.id==='tricouri'?'#catalog/7f77756b-5d8f-4915-bf9d-b444026e69ac':c.id==='nunta'?'#catalog/be825367-1b5c-42d4-86de-5c93a5d33a60':c.id==='ecusoane'?'#catalog/25ae881b-6a72-4845-922e-bc3450a2b688':c.id==='toppers'?'#catalog/c52386e7-187f-4c34-9e96-8d10d16694a5':c.id==='craciun'?'#catalog/eba7bf2c-1407-45b4-99d4-29293b725690':c.id==='cadouri'?'#catalog/6fd79a93-a99f-4a30-8132-1ff3a81bc6eb':'#'+c.id}">
   <div class="category-visual category-${c.visual}">
+    ${c.id==="cadouri"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/5c44c8b8-4cd0-4faa-8e6d-3c0be0b7d758.jpg" alt="Cadouri personalizate realizate manual" loading="eager">`:""}
     ${c.id==="toppers"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/d454dbb8-649c-44ff-91f5-68bccda41f0f.jpg" alt="Cake topper realizat manual" loading="eager">`:""}
     ${c.id==="craciun"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/2b45644e-49fc-406f-abb8-310e0bbbb292.jpg" alt="Produse de Crăciun" loading="eager">`:""}
     ${c.id==="ecusoane"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/27390188-d5d9-4668-aea6-e720f443f3a2.jpg" alt="Ecusoane personalizate" loading="eager">`:""}
