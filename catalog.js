@@ -84,6 +84,7 @@ const categories = [
 const categoryGrid=document.getElementById("category-grid");
 if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-card" href="${c.id==='tricouri'?'#catalog/7f77756b-5d8f-4915-bf9d-b444026e69ac':c.id==='nunta'?'#catalog/be825367-1b5c-42d4-86de-5c93a5d33a60':c.id==='ecusoane'?'#catalog/25ae881b-6a72-4845-922e-bc3450a2b688':c.id==='toppers'?'#catalog/c52386e7-187f-4c34-9e96-8d10d16694a5':c.id==='craciun'?'#catalog/eba7bf2c-1407-45b4-99d4-29293b725690':'#'+c.id}">
   <div class="category-visual category-${c.visual}">
+    ${c.id==="craciun"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/2b45644e-49fc-406f-abb8-310e0bbbb292.jpg" alt="Produse de Crăciun" loading="eager">`:""}
     ${c.id==="ecusoane"?`<img class="category-real-image" src="https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/catalog-images/products/27390188-d5d9-4668-aea6-e720f443f3a2.jpg" alt="Ecusoane personalizate" loading="eager">`:""}
     ${c.id==="mot"?`<div class="category-art-main">🎀</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`:`<div class="category-art-main">${c.icon}</div><div class="category-art-mini mini-one"></div><div class="category-art-mini mini-two"></div><div class="category-art-mini mini-three"></div>`}
     <span class="category-arrow">↗</span>
@@ -109,7 +110,7 @@ if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-ca
    if(!category)continue;
    const card=document.querySelector('.category-card[href="#'+cardId+'"]')||document.querySelector('.category-card[href="#catalog/'+category.id+'"]');
    const visual=card?.querySelector('.category-visual');
-   if(!visual)continue;
+   if(!visual||visual.querySelector('.category-real-image'))continue;
    const image=document.createElement('img');
    image.src=category.image_url;image.alt='Fotografie '+cardId;
    image.className='category-real-image';visual.append(image);
