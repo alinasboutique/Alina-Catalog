@@ -204,5 +204,51 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#catalo
 <script src="mot-navigation.js?v=5"></script>
 <script src="product-checkout-shirts-v9.js?v=20261023-cufar-actual-album"></script>
 <script src="custom-site-buttons.js?v=2"></script>
+
+<style id="mobile-catalog-optimizations">
+@media (max-width: 767px) {
+  html,body{max-width:100%;overflow-x:clip}
+  *,*::before,*::after{box-sizing:border-box}
+  .container{width:calc(100% - 28px);max-width:100%}
+  .site-header nav{display:flex;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .site-header nav a{flex:0 0 auto;white-space:nowrap;min-height:42px;display:inline-flex;align-items:center}
+  .header-tools{max-width:100%;flex-wrap:wrap;justify-content:center}
+  .section{padding-top:30px;padding-bottom:36px}
+  #dynamic-title,.botez-home h1,.botez-subpage h2{font-size:clamp(25px,7vw,34px);line-height:1.2;overflow-wrap:anywhere}
+  #dynamic-products{min-width:0}
+  .catalog-dynamic-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:16px 0 28px;min-width:0}
+  .catalog-dynamic-card{min-width:0;display:flex;flex-direction:column;border-radius:12px}
+  .catalog-dynamic-card img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;display:block}
+  .catalog-dynamic-card .details{padding:11px;display:flex;flex-direction:column;flex:1;min-width:0;gap:5px}
+  .catalog-dynamic-card h3{font-size:15px;line-height:1.3;margin:0;overflow-wrap:anywhere}
+  .catalog-dynamic-card strong{font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+  .catalog-dynamic-card .details p{font-size:12px;line-height:1.45;margin:3px 0}
+  .catalog-dynamic-card .details a,.catalog-dynamic-card .details button{width:100%;min-height:44px;margin-top:auto;white-space:normal;overflow-wrap:anywhere;line-height:1.3;padding:10px 6px;text-align:center}
+  .catalog-dynamic-categories,.botez-subpage[data-botez-page='invitatii'] .catalog-dynamic-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;width:100%}
+  .catalog-dynamic-categories a.invitation-album{min-width:0;min-height:150px;font-size:14px;overflow:hidden;padding:8px}
+  .catalog-dynamic-categories a.invitation-album:has(img){min-height:165px;padding:0}
+  .catalog-dynamic-categories a.invitation-album .album-title{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+  .catalog-dynamic-categories a.invitation-album img{width:100%;height:100%;object-fit:cover}
+  .botez-subgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:18px 0}
+  .botez-tile{min-width:0;min-height:135px;padding:13px;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+  .botez-home .botez-tile.has-category-cover{height:165px;min-height:165px}
+  .botez-subpage{padding:14px 0 32px}
+  .botez-home{padding:14px 0 32px}
+  .custom-request-trigger{display:block;max-width:100%;width:100%;min-height:48px;padding:12px 14px;white-space:normal;line-height:1.4}
+  .product-modal-backdrop,.custom-request-overlay{padding:8px!important;align-items:center!important}
+  .product-modal,.custom-request-box{width:100%!important;max-width:100%!important;max-height:calc(100dvh - 16px)!important;overflow-y:auto!important;overscroll-behavior:contain;padding:16px!important;border-radius:13px!important}
+  .product-modal h2,.custom-request-box h2{font-size:21px;line-height:1.25;overflow-wrap:anywhere}
+  .product-modal input,.product-modal textarea,.product-modal select,.custom-request-box input,.custom-request-box textarea,.custom-request-box select{font-size:16px!important;max-width:100%}
+  .product-modal button,.custom-request-box button{min-height:44px}
+  .product-gallery-thumbs{max-width:100%}
+  .product-modal .product-gallery-main{max-height:32dvh}
+  .footer-inner{overflow-wrap:anywhere}
+}
+@media (max-width: 360px) {
+  .catalog-dynamic-grid,.catalog-dynamic-categories,.botez-subpage[data-botez-page='invitatii'] .catalog-dynamic-categories,.botez-subgrid{grid-template-columns:minmax(0,1fr)}
+  .catalog-dynamic-card img{aspect-ratio:4/3}
+  .botez-home .botez-tile.has-category-cover{height:190px}
+}
+</style>
 </body>
 </html>
