@@ -116,13 +116,13 @@ if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-ca
    if(!visual||visual.querySelector('.category-real-image'))continue;
    const image=document.createElement('img');
    image.src=category.image_url;image.alt='Fotografie '+cardId;
-   image.className='category-real-image';visual.append(image);
+   image.className='category-real-image';image.loading='lazy';image.decoding='async';visual.append(image);
   }
   const model=mot.find(x=>x.is_active!==false);
   const photo=motPhotos.find(x=>x.model_id===model?.id&&x.image_url);
   if(photo){
    const visual=document.querySelector('.category-card[href="#mot"] .category-visual');
-   if(visual){const image=document.createElement('img');image.src=photo.image_url.startsWith('http')?photo.image_url:root+'/storage/v1/object/public/mot-models/'+photo.image_url;image.alt='Set pentru moț';image.className='category-real-image';visual.append(image)}
+   if(visual){const image=document.createElement('img');image.src=photo.image_url.startsWith('http')?photo.image_url:root+'/storage/v1/object/public/mot-models/'+photo.image_url;image.alt='Set pentru moț';image.className='category-real-image';image.loading='lazy';image.decoding='async';visual.append(image)}
   }
  }catch(e){console.warn('Coperțile reale nu au putut fi încărcate',e)}
 })();
