@@ -195,8 +195,18 @@ await refreshPublicCatalog();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastRefresh>15000)refreshPublicCatalog()});
 window.addEventListener('focus',()=>{if(Date.now()-lastRefresh>15000)refreshPublicCatalog()});
 setInterval(()=>{if(!document.hidden&&Date.now()-lastRefresh>90000)refreshPublicCatalog()},90000);
-window.addEventListener('hashchange',render);window.addEventListener('popstate',render);
-document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#catalog/"]');if(!a)return;e.preventDefault();history.pushState(null,'',a.getAttribute('href'));const mot=document.getElementById('mot'),landing=document.getElementById('categorii');if(mot)mot.hidden=true;if(landing)landing.hidden=true;if(botez)botez.hidden=true;document.querySelectorAll('main > section').forEach(x=>{if(x!==dynamic)x.hidden=true});render();window.scrollTo(0,0)});
+function scrollToCatalogContent(){
+ if(dynamic.hidden)return;
+ const target=grid.querySelector('.catalog-dynamic-categories')||title;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  const header=document.querySelector('header');
+  const offset=header&&getComputedStyle(header).position==='sticky'?header.getBoundingClientRect().height+12:16;
+  const y=target.getBoundingClientRect().top+window.scrollY-offset;
+  window.scrollTo({top:Math.max(0,y),behavior:'instant'});
+ }));
+}
+window.addEventListener('hashchange',()=>{render();if(location.hash.startsWith('#catalog/'))scrollToCatalogContent()});window.addEventListener('popstate',()=>{render();if(location.hash.startsWith('#catalog/'))scrollToCatalogContent()});
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#catalog/"]');if(!a)return;e.preventDefault();history.pushState(null,'',a.getAttribute('href'));const mot=document.getElementById('mot'),landing=document.getElementById('categorii');if(mot)mot.hidden=true;if(landing)landing.hidden=true;if(botez)botez.hidden=true;document.querySelectorAll('main > section').forEach(x=>{if(x!==dynamic)x.hidden=true});render();scrollToCatalogContent()});
 })();
 </script></main>
 
