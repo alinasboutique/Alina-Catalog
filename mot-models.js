@@ -370,21 +370,32 @@
       const modelName = selectedModel?.name || $('modelChoice')?.value?.trim() || 'Tematică la alegere';
       const modelPhoto = selectedPhotoUrl || (selectedModel ? productPhotos(selectedModel)[0] : '');
 
+      const separator = '────────────────────────';
+      const trayPrice = selectedTray === '80' ? 80 : 70;
+      const photoPrice = selectedChildPhoto === 'da' ? 5 : 0;
       const lines = [
-        'Bună! Doresc să comand un set pentru moț.',
+        'Bună, Alina! Aș dori să plasez următoarea comandă:',
+        '', separator, '*SET PENTRU MOȚ*', separator, '',
         `Model ales: ${modelName}`,
-        `Tavă: ${selectedTray === '80' ? 'rotundă £80' : 'dreptunghiulară £70'}`,
+        `Tavă: ${selectedTray === '80' ? 'rotundă' : 'dreptunghiulară'} (£${trayPrice})`,
         name ? `Numele copilului: ${name}` : '',
         date ? `Data: ${date}` : '',
         theme ? `Tema dorită: ${theme}` : '',
         message ? `Mesaj pentru tăviță: ${message}` : '',
         `Fotografie copil: ${selectedChildPhoto === 'da' ? 'Da (+£5)' : 'Nu'}`,
-        deliveryName ? `Nume livrare: ${deliveryName}` : '',
+        '', separator, '*LIVRARE*', separator, '',
+        'Cost livrare: £5.95',
+        '', separator, '*DATE CLIENT*', separator, '',
+        deliveryName ? `Nume și prenume: ${deliveryName}` : '',
         phone ? `Telefon: ${phone}` : '',
         address ? `Adresă: ${address}` : '',
         postcode ? `Cod poștal: ${postcode}` : '',
-        modelPhoto ? `Fotografia modelului ales: ${modelPhoto}` : ''
-      ].filter(Boolean).join('\n');
+        '', separator, '*TOTAL COMANDĂ*', separator, '',
+        `Produse: £${(trayPrice + photoPrice).toFixed(2)}`,
+        'Livrare: £5.95',
+        `*TOTAL: £${(trayPrice + photoPrice + 5.95).toFixed(2)}*`,
+        modelPhoto ? ['', separator, '*FOTOGRAFIA MODELULUI ALES*', separator, modelPhoto] : ''
+      ].join('\\n');
 
       window.open(wa(lines), '_blank', 'noopener');
     }, true);
