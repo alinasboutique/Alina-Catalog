@@ -29,13 +29,13 @@ async function optimizeImage(file){
 async function optimizeExistingBatch(mode="general"){
  const btn=el(mode==='mot'?'optimizeMot':'optimizeExisting'),progress=el('optimizeProgress');
  btn.disabled=true;
- let changed=0,skipped=0,failed=0;
+ let changed=0,skipped=0,failed=0;const reasons={format:0,small:0,notSmaller:0,alreadyExists:0};
  const root='https://zbfqhmiqjcvicqlidswo.supabase.co/storage/v1/object/public/';
  const sources=mode==='mot'?[['mot_model_photos','mot-models']]:[['catalog_product_photos','catalog-images'],['catalog_categories','catalog-images']];
  try{
   for(const [table,bucket] of sources){
    if(changed>=10)break;
-   const cursorKey='catalog-optimize-cursor-'+table;const cursor=localStorage.getItem(cursorKey)||'';let query=db.from(table).select('id,image_url').not('image_url','is',null).not('image_url','like','%/optimized/%').order('id').limit(35);if(cursor)query=query.gt('id',cursor);const {data,error}=await query;
+   const cursorKey='catalog-optimize-cursor-v3-'+table;const cursor=localStorage.getItem(cursorKey)||'';let query=db.from(table).select('id,image_url').not('image_url','is',null).not('image_url','like','%/optimized/%').order('id').limit(35);if(cursor)query=query.gt('id',cursor);const {data,error}=await query;
    if(error)throw error;
    for(const row of data||[]){
     if(changed>=10)break;
@@ -43,19 +43,19 @@ async function optimizeExistingBatch(mode="general"){
     const url=row.image_url||'';
     const relative=mode==='mot'&&!url.startsWith('http');
     const fetchUrl=relative?root+bucket+'/'+url:url;
-    if(!fetchUrl.startsWith(root+bucket+'/')||!fetchUrl.match(/\.(jpg|jpeg|png|webp)(\?|$)/i)){skipped++;continue}
+    if(!fetchUrl.startsWith(root+bucket+'/')||!fetchUrl.match(/\.(jpg|jpeg|png|webp)(\?|$)/i)){skipped++;reasons.format++;continue}
     try{
      progress.textContent='Optimizate: '+changed+'/10. Se verifică următoarea fotografie…';
      const response=await fetch(fetchUrl,{cache:'force-cache'});
      if(!response.ok)throw Error('HTTP '+response.status);
      const blob=await response.blob();
-     if(blob.size<180000){skipped++;continue}
+     if(blob.size<180000){skipped++;reasons.small++;continue}
      const file=new File([blob],'original.jpg',{type:blob.type||'image/jpeg'});
      const optimized=await optimizeImage(file);
-     if(optimized===file||optimized.size>blob.size*.82){skipped++;continue}
+     if(optimized===file||optimized.size>blob.size*.82){skipped++;reasons.notSmaller++;continue}
      const newPath='optimized/'+row.id+'.webp';
      const uploaded=await db.storage.from(bucket).upload(newPath,optimized,{contentType:'image/webp',upsert:false,cacheControl:'31536000'});
-     if(uploaded.error){if(uploaded.error.message?.includes('already exists')){skipped++;continue}throw uploaded.error}
+     if(uploaded.error){if(uploaded.error.message?.includes('already exists')){skipped++;reasons.alreadyExists++;continue}throw uploaded.error}
      const newUrl=relative?newPath:db.storage.from(bucket).getPublicUrl(newPath).data.publicUrl;
      const updated=await db.from(table).update({image_url:newUrl}).eq('id',row.id).eq('image_url',url).select('id');
      if(updated.error)throw updated.error;
@@ -65,7 +65,7 @@ async function optimizeExistingBatch(mode="general"){
    }
    if((data||[]).length<35)localStorage.removeItem(cursorKey);
   }
-  progress.textContent='Finalizat: '+changed+' fotografii optimizate, '+skipped+' omise, '+failed+' erori. Originalele au fost păstrate. '+(changed===10?'Poți apăsa din nou pentru următorul lot.':'Reîncearcă ulterior dacă mai sunt imagini.');
+  progress.textContent='Verificare v3: '+changed+' optimizate, '+skipped+' omise (format/adresă: '+reasons.format+', sub 180 KB: '+reasons.small+', reducere insuficientă: '+reasons.notSmaller+', deja existente: '+reasons.alreadyExists+'), '+failed+' erori. Originalele au fost păstrate.';
  }catch(err){progress.textContent='Optimizarea s-a oprit: '+err.message}
  finally{btn.disabled=false}
 }
