@@ -395,7 +395,7 @@
         'Livrare: £5.95',
         `*TOTAL: £${(trayPrice + photoPrice + 5.95).toFixed(2)}*`,
         modelPhoto ? ['', separator, '*FOTOGRAFIA MODELULUI ALES*', separator, modelPhoto] : ''
-      ].join('\\n');
+      ].join('\n');
 
       window.open(wa(lines), '_blank', 'noopener');
     }, true);
