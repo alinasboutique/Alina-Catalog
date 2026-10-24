@@ -39,10 +39,11 @@ async function optimizeExistingBatch(){
  try{
   for(const [table,bucket] of sources){
    if(changed>=10)break;
-   const {data,error}=await db.from(table).select('id,image_url').not('image_url','is',null).not('image_url','like','%/optimized/%').order('id').limit(150);
+   const cursorKey='catalog-optimize-cursor-'+table;const cursor=localStorage.getItem(cursorKey)||'';let query=db.from(table).select('id,image_url').not('image_url','is',null).not('image_url','like','%/optimized/%').order('id').limit(35);if(cursor)query=query.gt('id',cursor);const {data,error}=await query;
    if(error)throw error;
    for(const row of data||[]){
     if(changed>=10)break;
+    localStorage.setItem(cursorKey,row.id);
     const url=row.image_url||'';
     if(!url.startsWith(root+bucket+'/')||!url.match(/\.(jpg|jpeg|png|webp)(\?|$)/i)){skipped++;continue}
     try{
@@ -64,6 +65,7 @@ async function optimizeExistingBatch(){
      changed++;
     }catch(err){failed++;progress.textContent='Eroare la o imagine: '+err.message}
    }
+   if((data||[]).length<35)localStorage.removeItem(cursorKey);
   }
   progress.textContent='Finalizat: '+changed+' fotografii optimizate, '+skipped+' omise, '+failed+' erori. Originalele au fost păstrate. '+(changed===10?'Poți apăsa din nou pentru următorul lot.':'Reîncearcă ulterior dacă mai sunt imagini.');
  }catch(err){progress.textContent='Optimizarea s-a oprit: '+err.message}
