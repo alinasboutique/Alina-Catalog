@@ -41,10 +41,12 @@ async function optimizeExistingBatch(mode="general"){
     if(changed>=10)break;
     localStorage.setItem(cursorKey,row.id);
     const url=row.image_url||'';
-    if(!url.startsWith(root+bucket+'/')||!url.match(/\.(jpg|jpeg|png|webp)(\?|$)/i)){skipped++;continue}
+    const relative=mode==='mot'&&!url.startsWith('http');
+    const fetchUrl=relative?root+bucket+'/'+url:url;
+    if(!fetchUrl.startsWith(root+bucket+'/')||!fetchUrl.match(/\.(jpg|jpeg|png|webp)(\?|$)/i)){skipped++;continue}
     try{
      progress.textContent='Optimizate: '+changed+'/10. Se verifică următoarea fotografie…';
-     const response=await fetch(url,{cache:'force-cache'});
+     const response=await fetch(fetchUrl,{cache:'force-cache'});
      if(!response.ok)throw Error('HTTP '+response.status);
      const blob=await response.blob();
      if(blob.size<180000){skipped++;continue}
@@ -54,7 +56,7 @@ async function optimizeExistingBatch(mode="general"){
      const newPath='optimized/'+row.id+'.webp';
      const uploaded=await db.storage.from(bucket).upload(newPath,optimized,{contentType:'image/webp',upsert:false,cacheControl:'31536000'});
      if(uploaded.error){if(uploaded.error.message?.includes('already exists')){skipped++;continue}throw uploaded.error}
-     const newUrl=db.storage.from(bucket).getPublicUrl(newPath).data.publicUrl;
+     const newUrl=relative?newPath:db.storage.from(bucket).getPublicUrl(newPath).data.publicUrl;
      const updated=await db.from(table).update({image_url:newUrl}).eq('id',row.id).eq('image_url',url).select('id');
      if(updated.error)throw updated.error;
      if(!updated.data?.length)throw Error('Referința nu a fost actualizată; copia originală a rămas intactă.');
