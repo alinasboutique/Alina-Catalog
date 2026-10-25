@@ -60,7 +60,7 @@ for table in ("catalog_categories","catalog_product_photos","mot_model_photos"):
             row["image_url"]=mapping[full]
             changed=True
     if changed:
-        snapshot.write_text(json.dumps(records,ensure_ascii=False)+"\\n")
+        snapshot.write_text(json.dumps(records,ensure_ascii=False)+"\n")
 pathlib.Path("static/catalog-image-map.json").write_text(json.dumps(mapping,ensure_ascii=False,indent=2)+"\n")
 print(f"Backed up {len(mapping)} of {len(items)} referenced images; errors: {len(failed)}")
 if failed:
