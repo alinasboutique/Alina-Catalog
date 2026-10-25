@@ -97,15 +97,12 @@ if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-ca
 
 /* O singură copertă reală pentru fiecare categorie principală. */
 (async function loadCategoryCovers(){
- const root='https://zbfqhmiqjcvicqlidswo.supabase.co';
- const key='sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
- const headers={apikey:key,Authorization:'Bearer '+key};
- async function get(table,query){const r=await fetch(root+'/rest/v1/'+table+'?'+query,{headers});if(!r.ok)throw Error('cover fetch '+table);return r.json()}
+ async function get(table){const r=await fetch('./data/'+table+'.json');if(!r.ok)throw Error('cover fetch '+table);return r.json()}
  try{
   const [cats,mot,motPhotos]=await Promise.all([
-   get('catalog_categories','select=id,slug,image_url,parent_id'),
-   get('mot_models','select=id,category,is_active&is_active=eq.true'),
-   get('mot_model_photos','select=model_id,image_url,display_order&order=display_order.asc')
+   get('catalog_categories'),
+   get('mot_models'),
+   get('mot_model_photos')
   ]);
   const categorySlugs={tricouri:'tricouri-personalizate',ecusoane:'ecusoane',toppers:'cake-toppers',nunta:'nunta',botez:'botez',cadouri:'cadouri',craciun:'craciun',martisor:'martisor'};
   for(const [cardId,slug] of Object.entries(categorySlugs)){
@@ -122,7 +119,7 @@ if(categoryGrid) categoryGrid.innerHTML=categories.map(c=>`<a class="category-ca
   const photo=motPhotos.find(x=>x.model_id===model?.id&&x.image_url);
   if(photo){
    const visual=document.querySelector('.category-card[href="#mot"] .category-visual');
-   if(visual){const image=document.createElement('img');image.src=photo.image_url.startsWith('http')?photo.image_url:root+'/storage/v1/object/public/mot-models/'+photo.image_url;image.alt='Set pentru moț';image.className='category-real-image';image.loading='lazy';image.decoding='async';visual.append(image)}
+   if(visual){const image=document.createElement('img');image.src=photo.image_url.startsWith('/')||photo.image_url.startsWith('http')?photo.image_url:'';image.alt='Set pentru moț';image.className='category-real-image';image.loading='lazy';image.decoding='async';visual.append(image)}
   }
  }catch(e){console.warn('Coperțile reale nu au putut fi încărcate',e)}
 })();
