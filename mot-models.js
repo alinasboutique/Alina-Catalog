@@ -32,7 +32,7 @@
   const photoUrl = value => {
     if (!value) return '';
     if (/^(https?:)?\/\//i.test(value) || /^data:/i.test(value)) return value;
-    return SB_URL + '/storage/v1/object/public/' + PHOTO_BUCKET + '/' + String(value).replace(/^\//, '');
+    return String(value).startsWith('/Alina-Catalog/') ? value : SB_URL + '/storage/v1/object/public/' + PHOTO_BUCKET + '/' + String(value).replace(/^\//, '');
   };
 
   const wa = text => 'https://wa.me/447742444493?text=' + encodeURIComponent(text);
@@ -402,22 +402,16 @@
   }
 
   async function loadFromSupabase() {
-    const [modelsResult, photosResult] = await Promise.allSettled([
-      api('/mot_models?select=*&is_active=eq.true&order=display_order.asc,name.asc'),
-      api('/mot_model_photos?select=*&order=display_order.asc')
-    ]);
-
-    if (modelsResult.status !== 'fulfilled') throw modelsResult.reason;
-    const modelRows = Array.isArray(modelsResult.value) ? modelsResult.value : [];
-    const photoRows = photosResult.status === 'fulfilled' && Array.isArray(photosResult.value) ? photosResult.value : [];
-
-    modelRows.forEach(model => {
-      model.photos = photoRows
-        .filter(photo => String(photo.model_id) === String(model.id))
-        .sort((a,b) => (a.display_order || 0) - (b.display_order || 0));
-    });
-
-    return modelRows;
+    const [models,photoRows]=await Promise.all(['mot_models','mot_model_photos'].map(async name=>{
+      const response=await fetch('./data/'+name+'.json',{cache:'no-store'});
+      if(!response.ok)throw Error('Nu pot încărca '+name);
+      return response.json();
+    }));
+    return models.filter(model=>model.is_active!==false).map(model=>({
+      ...model,
+      photos:photoRows.filter(photo=>String(photo.model_id)===String(model.id))
+        .sort((a,b)=>(a.display_order||0)-(b.display_order||0))
+    }));
   }
 
   async function loadFromIndexedDB() {
