@@ -22,8 +22,8 @@ for row in rows("catalog_product_photos","id,image_url","image_url=not.is.null")
 for row in rows("catalog_categories","id,image_url","image_url=not.is.null"):
     items.append(("category",str(row["id"]),row["image_url"]))
 for row in rows("mot_model_photos","id,image_url","image_url=not.is.null"):
-    items.append(("mot",str(row["id"]),BASE+"/storage/v1/object/public/mot-models/"+row["image_url"]))
-mapping={}
+    items.append(("mot",str(row["id"]),row["image_url"] if row["image_url"].startswith("http") else BASE+"/storage/v1/object/public/mot-models/"+row["image_url"]))
+mapping=json.loads(pathlib.Path("static/catalog-image-map.json").read_text()) if pathlib.Path("static/catalog-image-map.json").exists() else {}
 failed=[]
 for idx,(kind,id,url) in enumerate(items,1):
     if not url.startswith(BASE+"/storage/v1/object/public/"): continue
@@ -37,7 +37,7 @@ for idx,(kind,id,url) in enumerate(items,1):
                 with urllib.request.urlopen(req,timeout=45) as response:
                     data=response.read()
                     content_type=response.headers.get("Content-Type","")
-                if len(data)<100 or not (data.startswith(b"RIFF") and data[8:12]==b"WEBP" or data.startswith(b"\\xff\\xd8\\xff") or data.startswith(b"\\x89PNG")):
+                if len(data)<100 or not (data.startswith(b"RIFF") and data[8:12]==b"WEBP" or data.startswith(bytes.fromhex("ffd8ff")) or data.startswith(bytes.fromhex("89504e47"))):
                     raise ValueError("Unexpected image format: "+content_type)
                 dest.write_bytes(data)
                 break
@@ -47,6 +47,20 @@ for idx,(kind,id,url) in enumerate(items,1):
     if dest.exists() and dest.stat().st_size>100:
         mapping[url]="/Alina-Catalog/static/catalog-images/"+dest.name
     if idx%100==0: print(f"Processed {idx}/{len(items)} images",flush=True)
+for table in ("catalog_categories","catalog_product_photos","mot_model_photos"):
+    snapshot=pathlib.Path("data")/(table+".json")
+    if not snapshot.exists(): continue
+    records=json.loads(snapshot.read_text())
+    changed=False
+    for row in records:
+        original=row.get("image_url")
+        if not original or original.startswith("/Alina-Catalog/"): continue
+        full=original if original.startswith("http") else BASE+"/storage/v1/object/public/mot-models/"+original
+        if full in mapping:
+            row["image_url"]=mapping[full]
+            changed=True
+    if changed:
+        snapshot.write_text(json.dumps(records,ensure_ascii=False)+"\\n")
 pathlib.Path("static/catalog-image-map.json").write_text(json.dumps(mapping,ensure_ascii=False,indent=2)+"\n")
 print(f"Backed up {len(mapping)} of {len(items)} referenced images; errors: {len(failed)}")
 if failed:
