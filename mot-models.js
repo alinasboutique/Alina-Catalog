@@ -17,6 +17,8 @@
   let selectedModel = null;
   let selectedPhotoUrl = '';
   let selectedTray = '70';
+  let motPrices={rectangular:70,round:80,childPhoto:5};
+  fetch('./data/mot-prices.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(p=>{if(p){motPrices=p;document.querySelectorAll('[data-custom-tray]').forEach(b=>{const round=b.dataset.customTray==='80';b.textContent='Tavă '+(round?'rotundă':'dreptunghiulară')+' £'+(round?motPrices.round:motPrices.rectangular)})}}).catch(()=>{});
   let selectedChildPhoto = 'nu';
 
   const esc = s => String(s ?? '').replace(/[&<>\"']/g, m => ({
@@ -371,8 +373,8 @@
       const modelPhoto = selectedPhotoUrl || (selectedModel ? productPhotos(selectedModel)[0] : '');
 
       const separator = '────────────────────────';
-      const trayPrice = selectedTray === '80' ? 80 : 70;
-      const photoPrice = selectedChildPhoto === 'da' ? 5 : 0;
+      const trayPrice = selectedTray === '80' ? motPrices.round : motPrices.rectangular;
+      const photoPrice = selectedChildPhoto === 'da' ? motPrices.childPhoto : 0;
       const lines = [
         'Bună, Alina! Aș dori să plasez următoarea comandă:',
         '', separator, '*SET PENTRU MOȚ*', separator, '',
@@ -382,7 +384,7 @@
         date ? `Data: ${date}` : '',
         theme ? `Tema dorită: ${theme}` : '',
         message ? `Mesaj pentru tăviță: ${message}` : '',
-        `Fotografie copil: ${selectedChildPhoto === 'da' ? 'Da (+£5)' : 'Nu'}`,
+        `Fotografie copil: ${selectedChildPhoto === 'da' ? 'Da (+£'+motPrices.childPhoto+')' : 'Nu'}`,
         '', separator, '*LIVRARE*', separator, '',
         'Cost livrare: £5.95',
         '', separator, '*DATE CLIENT*', separator, '',
