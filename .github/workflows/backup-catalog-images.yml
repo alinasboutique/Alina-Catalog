@@ -21,7 +21,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add static/catalog-images static/catalog-image-map.json
+          git add static/catalog-images static/catalog-image-map.json data/catalog_categories.json data/catalog_product_photos.json data/mot_model_photos.json
           if ! git diff --cached --quiet; then
             git commit -m 'Backup optimized catalog images'
             git push
