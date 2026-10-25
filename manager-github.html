@@ -21,7 +21,21 @@ async function put(path,content,currentSha,message){return request(path,'PUT',{m
 async function saveJSON(name){const raw=new TextEncoder().encode(JSON.stringify(data[name]));const result=await put('data/'+name+'.json',bytesToBase64(raw),sha[name],'Actualizare '+name+' din manager GitHub');sha[name]=result.content.sha}
 function photoRows(){return data[tab==='mot_models'?'mot_model_photos':'catalog_product_photos']}
 function photoKey(){return tab==='mot_models'?'model_id':'product_id'}
-function imageFor(item){if(tab==='catalog_categories')return item.image_url;return photoRows().find(p=>p[photoKey()]===item.id&&p.is_main)?.image_url||photoRows().find(p=>p[photoKey()]===item.id)?.image_url}
+function imageFor(item){if(tab==='catalog_categories')return categoryCover(item);return photoRows().find(p=>p[photoKey()]===item.id&&p.is_main)?.image_url||photoRows().find(p=>p[photoKey()]===item.id)?.image_url}
+function categoryCover(cat){
+ if(cat.image_url)return cat.image_url;
+ const cats=data.catalog_categories||[],products=data.catalog_products||[],photos=data.catalog_product_photos||[];
+ const descendants=[cat.id];
+ for(let i=0;i<descendants.length;i++)cats.filter(c=>c.parent_id===descendants[i]).forEach(c=>descendants.push(c.id));
+ for(const id of descendants.slice(1)){const child=cats.find(c=>c.id===id);if(child?.image_url)return child.image_url}
+ const product=products.find(p=>descendants.includes(p.category_id)&&photos.some(ph=>ph.product_id===p.id&&ph.image_url));
+ if(product)return photos.find(ph=>ph.product_id===product.id&&ph.is_main)?.image_url||photos.find(ph=>ph.product_id===product.id)?.image_url;
+ if(/moț|mot/i.test(cat.name)){
+  const model=(data.mot_models||[]).find(m=>(data.mot_model_photos||[]).some(p=>p.model_id===m.id));
+  if(model)return data.mot_model_photos.find(p=>p.model_id===model.id&&p.is_main)?.image_url||data.mot_model_photos.find(p=>p.model_id===model.id)?.image_url;
+ }
+ return '';
+}
 function labelFor(item){if(tab==='catalog_products'){const c=data.catalog_categories.find(c=>c.id===item.category_id);return (c?.name||'Fără categorie')+' • £'+Number(item.price||0).toFixed(2)}if(tab==='mot_models')return item.category==='baiat'?'Băiat':'Fetiță';return item.slug||''}
 function render(){
  const tabs=[['catalog_products','Produse'],['mot_models','Seturi moț'],['catalog_categories','Categorii']];
@@ -38,7 +52,7 @@ function render(){
   content='<div class="crumbs"><button data-home="1">🏠 Categorii principale</button>'+crumbs.map(c=>'<span>›</span><button data-cat="'+safe(c.id)+'">'+safe(c.name)+'</button>').join('')+'</div>';
   const options=children(selectedCategory);
   if(options.length){
-   content+='<h3>'+(current?'Subcategorii — '+safe(current.name):'Alege categoria principală')+'</h3><div class="category-grid">'+options.map(c=>'<button class="category-tile" data-cat="'+safe(c.id)+'">'+(c.image_url?'<img loading="lazy" src="'+safe(publicPhotoUrl(c.image_url))+'">':'<div style="height:115px">📁</div>')+'<strong>'+safe(c.name)+'</strong><small>'+productCount(c.id)+' produse</small></button>').join('')+'</div>';
+   content+='<h3>'+(current?'Subcategorii — '+safe(current.name):'Alege categoria principală')+'</h3><div class="category-grid">'+options.map(c=>'<button class="category-tile" data-cat="'+safe(c.id)+'">'+(categoryCover(c)?'<img loading="lazy" src="'+safe(publicPhotoUrl(categoryCover(c)))+'">':'<div style="height:115px">📁</div>')+'<strong>'+safe(c.name)+'</strong><small>'+productCount(c.id)+' produse</small></button>').join('')+'</div>';
   }
   if(selectedCategory){
    const arr=data.catalog_products.filter(p=>p.category_id===selectedCategory);
