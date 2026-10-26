@@ -28,7 +28,7 @@ body main#top>section.hero{display:grid!important;grid-template-columns:minmax(0
 body main#top>section.hero::before,body main#top>section.hero::after{display:none!important;content:none!important}
 body main#top>section.hero .hero-copy{width:100%!important;max-width:700px!important;margin:0!important;text-align:left!important;justify-self:start!important}
 body main#top>section.hero h1{font:400 clamp(44px,4.6vw,74px)/1.12 Georgia,serif!important;letter-spacing:-2px!important;text-align:left!important;margin-bottom:26px!important}
-body main#top>section.hero h1 em{font-family:"Brush Script MT","Segoe Script","URW Chancery L",cursive!important;font-size:1.12em!important;font-weight:400!important;letter-spacing:-2.5px!important;line-height:1.05!important;color:#a16b70!important}
+body main#top>section.hero h1 em{font-family:Georgia,"Times New Roman",serif!important;font-size:1.08em!important;font-style:italic!important;font-weight:400!important;letter-spacing:-1.6px!important;line-height:1.05!important;color:#a16b70!important}
 body main#top>section.hero .intro{max-width:520px!important;text-align:left!important}
 body main#top>section.hero .hero-actions{justify-content:flex-start!important}
 body main#top>section.hero .hero-art{height:385px!important;width:100%!important;display:block!important;position:relative!important;justify-self:end!important}
