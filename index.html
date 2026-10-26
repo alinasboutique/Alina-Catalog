@@ -156,7 +156,44 @@ if(p.category_id==='18d494d2-fc71-4589-a759-bae162309e0d'){
  const personalization=node('div');personalization.append(description,qtyLabel,rows,total,send);
  send.onclick=()=>{calculateShirts();if(send.disabled)return;personalization.style.display='none';checkout.style.display='block';heading.textContent='Finalizare comandă – '+p.name;overlay.scrollTop=0};
  back.onclick=()=>{checkout.style.display='none';personalization.style.display='block';heading.textContent='Personalizare tricouri – '+p.name;overlay.scrollTop=0};
- confirm.onclick=()=>{const missing=customerFields.filter(([label,key])=>customer[key].required&&!customer[key].value.trim());if(missing.length){error.textContent='Completează câmpurile obligatorii: '+missing.map(x=>x[0]).join(', ');customer[missing[0][1]].focus();return}if(customer.email.value&&!customer.email.checkValidity()){error.textContent='Adresa de email nu este validă.';customer.email.focus();return}error.textContent='';const items=entries(),cost=items.reduce((sum,x)=>sum+(['Copil','Body'].includes(x.type)?10:13),0),delivery=window.catalogShipping.shipping(items.reduce((g,x)=>g+(['Copil','Body'].includes(x.type)?180:240),0));const message=['Bună! Doresc să plasez o comandă.','Model ales: '+p.name,'Cod unic model: '+p.id,'FOTOGRAFIA EXACTĂ A MODELULUI ALES:',''+(pic?.image_url||'Fotografie indisponibilă'),'Cod model: '+p.id,'Cantitate: '+items.length,...items.flatMap((x,i)=>['Produs '+(i+1)+': '+x.type+' / '+x.size+(x.type==='Body'?' / '+x.sleeve:''),'Pentru: '+x.who,'Mesaj: '+(x.msg||'Ca în model')]),'','DATE LIVRARE',...customerFields.map(([label,key])=>label+': '+(customer[key].value||'-')),'Alte detalii: '+(note.value||'-'),'','Produse: £'+cost.toFixed(2),'Livrare: £'+delivery.toFixed(2),'TOTAL: £'+(cost+delivery).toFixed(2)].join('\n');window.open('https://wa.me/447742444493?text='+encodeURIComponent(message),'_blank','noopener')};
+ confirm.onclick=()=>{const missing=customerFields.filter(([label,key])=>customer[key].required&&!customer[key].value.trim());if(missing.length){error.textContent='Completează câmpurile obligatorii: '+missing.map(x=>x[0]).join(', ');customer[missing[0][1]].focus();return}if(customer.email.value&&!customer.email.checkValidity()){error.textContent='Adresa de email nu este validă.';customer.email.focus();return}error.textContent='';const items=entries(),cost=items.reduce((sum,x)=>sum+(['Copil','Body'].includes(x.type)?10:13),0),delivery=window.catalogShipping.shipping(items.reduce((g,x)=>g+(['Copil','Body'].includes(x.type)?180:240),0));const imagePath=pic?.image_url||'';
+ const imageLink=imagePath?new URL(imagePath,location.origin).href:'';
+ const divider='━━━━━━━━━━━━━━━━━━━━';
+ const message=[
+ 'Bună, Alina! Aș dori să plasez următoarea comandă:',
+ '',
+ divider,
+ '*TRICOURI PERSONALIZATE*',
+ divider,
+ '',
+ '*MODEL ALES:* '+p.name,
+ '*FOTOGRAFIA MODELULUI:*',
+ imageLink||'Fotografie indisponibilă',
+ '',
+ '*CANTITATE:* '+items.length+' buc.',
+ '',
+ '*PERSONALIZARE*',
+ ...items.flatMap((x,i)=>[
+ '',
+ '*Tricou '+(i+1)+'*',
+ 'Tip și mărime: '+x.type+' / '+x.size+(x.type==='Body'?' / '+x.sleeve:''),
+ 'Pentru: '+x.who,
+ 'Mesaj: '+(x.msg||'Ca în model')
+ ]),
+ '',
+ divider,
+ '*LIVRARE*',
+ divider,
+ ...customerFields.map(([label,key])=>label+': '+(customer[key].value||'-')),
+ 'Alte detalii: '+(note.value||'-'),
+ '',
+ divider,
+ '*TOTAL COMANDĂ*',
+ divider,
+ 'Produse: £'+cost.toFixed(2),
+ 'Livrare: £'+delivery.toFixed(2),
+ '*TOTAL: £'+(cost+delivery).toFixed(2)
+ ].join('\n');window.open('https://wa.me/447742444493?text='+encodeURIComponent(message),'_blank','noopener')};
  top.append(heading,close);panel.append(top,personalization,checkout);overlay.append(panel);
  function dismiss(){overlay.style.display='none';document.body.style.overflow=''}
  document.body.append(overlay);orderButton.onclick=()=>{checkout.style.display='none';personalization.style.display='block';heading.textContent='Personalizare tricouri – '+p.name;overlay.style.display='block';document.body.style.overflow='hidden';renderShirts();overlay.scrollTop=0};card.querySelector('img')?.addEventListener('click',orderButton.onclick);
