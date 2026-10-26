@@ -370,7 +370,8 @@
       const address = $('address')?.value?.trim() || '';
       const postcode = $('postcode')?.value?.trim() || '';
       const modelName = selectedModel?.name || $('modelChoice')?.value?.trim() || 'Tematică la alegere';
-      const modelPhoto = selectedPhotoUrl || (selectedModel ? productPhotos(selectedModel)[0] : '');
+      const modelPhotoPath = selectedPhotoUrl || (selectedModel ? productPhotos(selectedModel)[0] : '');
+      const modelPhoto = modelPhotoPath ? new URL(modelPhotoPath, window.location.origin).href : '';
 
       const separator = '────────────────────────';
       const trayPrice = selectedTray === '80' ? motPrices.round : motPrices.rectangular;
@@ -396,7 +397,7 @@
         `Produse: £${(trayPrice + photoPrice).toFixed(2)}`,
         'Livrare: £5.95',
         `*TOTAL: £${(trayPrice + photoPrice + 5.95).toFixed(2)}*`,
-        modelPhoto ? ['', separator, '*FOTOGRAFIA MODELULUI ALES*', separator, modelPhoto] : ''
+        ...(modelPhoto ? ['', '*FOTOGRAFIA MODELULUI ALES*', modelPhoto] : [])
       ].join('\n');
 
       window.open(wa(lines), '_blank', 'noopener');
