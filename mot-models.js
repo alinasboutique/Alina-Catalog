@@ -1,13 +1,5 @@
-/* SETURI PENTRU MOȚ — sursa reală a modelelor este catalogul Supabase.
-   Nu folosim IndexedDB ca sursă principală: aceea era baza locală a versiunii vechi
-   și de aici venea problema că pe alt dispozitiv / altă versiune nu apăreau toate pozele.
-*/
+/* Seturi pentru moț: modele și fotografii publicate pe GitHub Pages. */
 (() => {
-  const SB_URL = 'https://zbfqhmiqjcvicqlidswo.supabase.co';
-  const SB_KEY = 'sb_publishable_d81c4EtU4mkkqgBnVQi9HQ_nf7M2zFb';
-  const API = SB_URL + '/rest/v1';
-  const HEADERS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
-  const PHOTO_BUCKET = 'mot-models';
   const DB_NAME = 'AlinaCatalogFixed4';
   const STORE_NAME = 'products';
   const $ = id => document.getElementById(id);
@@ -34,17 +26,11 @@
   const photoUrl = value => {
     if (!value) return '';
     if (/^(https?:)?\/\//i.test(value) || /^data:/i.test(value)) return value;
-    return String(value).startsWith('/Alina-Catalog/') ? value : SB_URL + '/storage/v1/object/public/' + PHOTO_BUCKET + '/' + String(value).replace(/^\//, '');
+    return new URL(String(value).replace(/^\//, ''), window.location.origin + '/Alina-Catalog/').href;
   };
 
   const wa = text => 'https://wa.me/447742444493?text=' + encodeURIComponent(text);
 
-  async function api(path) {
-    const response = await fetch(API + path, { headers: HEADERS });
-    const text = await response.text();
-    if (!response.ok) throw new Error(text || ('HTTP ' + response.status));
-    return text ? JSON.parse(text) : [];
-  }
 
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -404,7 +390,7 @@
     }, true);
   }
 
-  async function loadFromSupabase() {
+  async function loadFromGitHub() {
     const [models,photoRows]=await Promise.all(['mot_models','mot_model_photos'].map(async name=>{
       const response=await fetch('./data/'+name+'.json',{cache:'no-store'});
       if(!response.ok)throw Error('Nu pot încărca '+name);
@@ -452,12 +438,12 @@
     installWhatsApp();
 
     try {
-      products = await loadFromSupabase();
-      if (!products.length) throw new Error('Supabase nu a returnat modele active.');
+      products = await loadFromGitHub();
+      if (!products.length) throw new Error('GitHub nu a returnat modele active.');
       renderModels();
       updateMotCategoryPhoto();
-    } catch (supabaseError) {
-      console.warn('Supabase mot models:', supabaseError);
+    } catch (githubError) {
+      console.warn('GitHub mot models:', githubError);
       try {
         products = await loadFromIndexedDB();
         renderModels();
