@@ -26,7 +26,7 @@
   const photoUrl = value => {
     if (!value) return '';
     if (/^(https?:)?\/\//i.test(value) || /^data:/i.test(value)) return value;
-    return new URL(String(value).replace(/^\//, ''), window.location.origin + '/Alina-Catalog/').href;
+    return new URL(String(value), window.location.origin + '/Alina-Catalog/').href;
   };
 
   const wa = text => 'https://wa.me/447742444493?text=' + encodeURIComponent(text);
