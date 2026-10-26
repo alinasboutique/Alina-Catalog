@@ -220,7 +220,7 @@
       const gallery = photos.length
         ? `<div class="mot-gallery">${photos.slice(0,12).map((url,i) => `
             <button type="button" class="mot-photo" data-index="${i}" data-model="${index}" aria-label="Vezi fotografia ${i + 1}">
-              <img src="${esc(url)}" alt="${esc(model.name || 'Model set moț')}" loading="lazy">
+              <img src="${esc(url)}" alt="${esc(model.name || 'Model set moț')}" loading="eager" decoding="async">
             </button>`).join('')}</div>`
         : '<div class="mot-no-photo">Acest model nu are fotografii salvate în catalog.</div>';
 
